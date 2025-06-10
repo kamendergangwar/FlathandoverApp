@@ -93,7 +93,7 @@ export default function LoginScreen() {
 
             <View style={styles.demoInfo}>
               <Text style={styles.demoText}>Demo Credentials:</Text>
-              <Text style={styles.demoText}>Email: agent@company.com</Text>
+              <Text style={styles.demoText}>Email: agent@helios.com</Text>
               <Text style={styles.demoText}>Password: password123</Text>
             </View>
           </View>
