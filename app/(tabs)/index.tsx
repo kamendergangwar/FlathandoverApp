@@ -375,6 +375,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
 import { Calendar, MapPin, Chrome as Home, CircleCheck as CheckCircle, Clock, TriangleAlert as AlertTriangle, ArrowRight, Search, FileText, Globe } from 'lucide-react-native';
+import LoginIcon from '../components/LoginIcon';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -400,9 +401,13 @@ export default function Dashboard() {
         style={styles.header}
       >
         <View style={styles.headerContent}>
+             
           <View>
-            <Text style={styles.greeting}>{t('welcome_back')}</Text>
-            <Text style={styles.agentName}>{user?.name}</Text>
+            
+              <LoginIcon width={100} height={50} fill="#ffffff" />
+              
+            {/* <Text style={styles.greeting}>{t('welcome_back')}</Text> */}
+            {/* <Text style={styles.agentName}>{user?.name}</Text> */}
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
@@ -417,6 +422,13 @@ export default function Dashboard() {
             </View>
           </View>
         </View>
+          <View>
+            
+              
+              
+            {/* <Text style={styles.greeting}>{t('welcome_back')}</Text> */}
+            <Text style={styles.agentName}>{user?.name}</Text>
+          </View>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -535,8 +547,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   header: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   headerContent: {
     flexDirection: 'row',
@@ -549,13 +561,14 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
   },
   agentName: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
     color: '#ffffff',
   },
   headerRight: {
+    //marginTop:50,
     flexDirection: 'row',
-    alignItems: 'center',
+    //alignItems: 'center',
   },
   languageButton: {
     flexDirection: 'row',

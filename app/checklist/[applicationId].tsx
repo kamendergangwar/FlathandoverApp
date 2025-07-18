@@ -660,13 +660,1168 @@
 // });
 
 
+// import React, { useState } from 'react';
+// import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { useLocalSearchParams, useRouter } from 'expo-router';
+// import { useApp } from '@/contexts/AppContext';
+// import { CircleCheck as CheckCircle, Circle, ArrowLeft, ArrowRight, TriangleAlert as AlertTriangle, Zap, Wrench, DoorOpen, Palette, Clock, X } from 'lucide-react-native';
+
+// const categoryIcons = {
+//   'Electrical': Zap,
+//   'Plumbing': Wrench,
+//   'Doors & Windows': DoorOpen,
+//   'Walls & Flooring': Palette,
+//   'Kitchen & Bathroom': Wrench,
+// };
+
+// export default function ChecklistScreen() {
+//   const { applicationId } = useLocalSearchParams();
+//   const router = useRouter();
+//   const { currentFlat, checklist, updateChecklistItem, t } = useApp();
+//   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+//   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
+
+//   if (!currentFlat) {
+//     return (
+//       <SafeAreaView style={styles.container}>
+//         <Text>No flat selected</Text>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   const categories = [...new Set(checklist.map(item => item.category))];
+//   const completedItems = checklist.filter(item => item.checked).length;
+//   const totalItems = checklist.length;
+//   const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+//   const hasIssues = checklist.some(item => !item.checked && item.issue);
+//   const incompleteItems = checklist.filter(item => !item.checked);
+  
+//   // 70% completion requirement
+//   const minimumCompletionPercentage = 70;
+//   const canProceedWithHandover = progress >= minimumCompletionPercentage;
+
+//   const handleItemToggle = (itemId: string, checked: boolean) => {
+//     updateChecklistItem(itemId, checked);
+//   };
+
+//   const handleProceed = () => {
+//     if (completedItems === totalItems) {
+//       router.push(`/signature/${applicationId}`);
+//     } else if (hasIssues) {
+//       router.push(`/complaint/${applicationId}`);
+//     } else if (canProceedWithHandover) {
+//       setShowIncompleteDialog(true);
+//     } else {
+//       Alert.alert(
+//         t('insufficient_completion'),
+//         t('insufficient_completion_message').replace('{percent}', Math.round(progress).toString()),
+//         [{ text: t('ok') }]
+//       );
+//     }
+//   };
+
+//   const handleProceedWithIncomplete = () => {
+//     setShowIncompleteDialog(false);
+//     router.push(`/signature/${applicationId}`);
+//   };
+
+//   const handleHoldHandover = () => {
+//     setShowIncompleteDialog(false);
+//     router.push(`/complaint/${applicationId}`);
+//   };
+
+//   const renderCategoryItems = (category: string) => {
+//     const categoryItems = checklist.filter(item => item.category === category);
+//     const completedCategoryItems = categoryItems.filter(item => item.checked).length;
+    
+//     return (
+//       <View key={category} style={styles.categorySection}>
+//         <TouchableOpacity 
+//           style={styles.categoryHeader}
+//           onPress={() => setExpandedCategory(expandedCategory === category ? null : category)}
+//         >
+//           <View style={styles.categoryTitleContainer}>
+//             {categoryIcons[category as keyof typeof categoryIcons] && 
+//               React.createElement(categoryIcons[category as keyof typeof categoryIcons], { 
+//                 size: 20, 
+//                 color: '#2563eb' 
+//               })
+//             }
+//             <Text style={styles.categoryTitle}>{t(category.toLowerCase().replace(/\s+/g, '_').replace('&', ''))}</Text>
+//           </View>
+//           <View style={styles.categoryProgress}>
+//             <Text style={styles.categoryProgressText}>
+//               {completedCategoryItems}/{categoryItems.length}
+//             </Text>
+//           </View>
+//         </TouchableOpacity>
+
+//         {(expandedCategory === category || expandedCategory === null) && (
+//           <View style={styles.categoryItems}>
+//             {categoryItems.map((item) => (
+//               <TouchableOpacity
+//                 key={item.id}
+//                 style={styles.checklistItem}
+//                 onPress={() => handleItemToggle(item.id, !item.checked)}
+//               >
+//                 <View style={styles.itemLeft}>
+//                   {item.checked ? (
+//                     <CheckCircle size={24} color="#059669" />
+//                   ) : (
+//                     <Circle size={24} color="#d1d5db" />
+//                   )}
+//                   <Text style={[
+//                     styles.itemText,
+//                     item.checked && styles.itemTextCompleted
+//                   ]}>
+//                     {t(item.item)}
+//                   </Text>
+//                 </View>
+//                 {item.issue && (
+//                   <AlertTriangle size={16} color="#f59e0b" />
+//                 )}
+//               </TouchableOpacity>
+//             ))}
+//           </View>
+//         )}
+//       </View>
+//     );
+//   };
+
+//   const renderIncompleteDialog = () => {
+//     if (!showIncompleteDialog) return null;
+
+//     return (
+//       <View style={styles.dialogOverlay}>
+//         <View style={styles.dialogContainer}>
+//           <View style={styles.dialogHeader}>
+//             <AlertTriangle size={32} color="#f59e0b" />
+//             <Text style={styles.dialogTitle}>{t('proceed_with_incomplete')}</Text>
+//           </View>
+
+//           <Text style={styles.dialogMessage}>
+//             {t('incomplete_dialog_message')
+//               .replace('{count}', incompleteItems.length.toString())
+//               .replace('{percent}', Math.round(progress).toString())}
+//           </Text>
+
+//           <View style={styles.incompleteItemsList}>
+//             <Text style={styles.incompleteItemsTitle}>{t('incomplete_items')}</Text>
+//             {incompleteItems.slice(0, 3).map((item) => (
+//               <View key={item.id} style={styles.incompleteItem}>
+//                 <Circle size={16} color="#f59e0b" />
+//                 <Text style={styles.incompleteItemText}>{t(item.item)}</Text>
+//               </View>
+//             ))}
+//             {incompleteItems.length > 3 && (
+//               <Text style={styles.moreItemsText}>
+//                 {t('more_items').replace('{count}', (incompleteItems.length - 3).toString())}
+//               </Text>
+//             )}
+//           </View>
+
+//           <View style={styles.dialogActions}>
+//             <TouchableOpacity 
+//               style={styles.dialogButtonSecondary}
+//               onPress={handleHoldHandover}
+//             >
+//               <Clock size={16} color="#dc2626" />
+//               <Text style={styles.dialogButtonSecondaryText}>{t('hold_handover')}</Text>
+//             </TouchableOpacity>
+
+//             <TouchableOpacity 
+//               style={styles.dialogButtonPrimary}
+//               onPress={handleProceedWithIncomplete}
+//             >
+//               <ArrowRight size={16} color="#ffffff" />
+//               <Text style={styles.dialogButtonPrimaryText}>{t('proceed_anyway')}</Text>
+//             </TouchableOpacity>
+//           </View>
+
+//           <TouchableOpacity 
+//             style={styles.dialogCloseButton}
+//             onPress={() => setShowIncompleteDialog(false)}
+//           >
+//             <Text style={styles.dialogCloseText}>{t('cancel')}</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     );
+//   };
+
+//   const getProgressColor = () => {
+//     if (progress >= minimumCompletionPercentage) return '#059669';
+//     if (progress >= 50) return '#f59e0b';
+//     return '#dc2626';
+//   };
+
+//   const getActionButton = () => {
+//     if (completedItems === totalItems) {
+//       return (
+//         <TouchableOpacity 
+//           style={styles.proceedButton}
+//           onPress={handleProceed}
+//         >
+//           <Text style={styles.proceedButtonText}>{t('proceed_to_signature')}</Text>
+//           <ArrowRight size={20} color="#ffffff" />
+//         </TouchableOpacity>
+//       );
+//     } else if (hasIssues) {
+//       return (
+//         <TouchableOpacity 
+//           style={styles.reportButton}
+//           onPress={handleProceed}
+//         >
+//           <AlertTriangle size={20} color="#ffffff" />
+//           <Text style={styles.reportButtonText}>{t('report_issues')}</Text>
+//         </TouchableOpacity>
+//       );
+//     } else if (canProceedWithHandover) {
+//       return (
+//         <TouchableOpacity 
+//           style={styles.proceedIncompleteButton}
+//           onPress={handleProceed}
+//         >
+//           <Text style={styles.proceedIncompleteButtonText}>
+//             {t('continue_with_incomplete').replace('{count}', incompleteItems.length.toString())}
+//           </Text>
+//           <ArrowRight size={20} color="#ffffff" />
+//         </TouchableOpacity>
+//       );
+//     } else {
+//       return (
+//         <View style={styles.blockedContainer}>
+//           <X size={24} color="#dc2626" />
+//           <View style={styles.blockedTextContainer}>
+//             <Text style={styles.blockedTitle}>
+//               {t('minimum_completion_required')}
+//             </Text>
+//             <Text style={styles.blockedText}>
+//               {t('complete_more_items').replace('{count}', (Math.ceil((minimumCompletionPercentage / 100) * totalItems) - completedItems).toString())}
+//             </Text>
+//           </View>
+//         </View>
+//       );
+//     }
+//   };
+
+//   return (
+//     <SafeAreaView style={styles.container}>
+//       <LinearGradient
+//         colors={['#1e40af', '#2563eb']}
+//         style={styles.header}
+//       >
+//         <TouchableOpacity 
+//           style={styles.backButton}
+//           onPress={() => router.back()}
+//         >
+//           <ArrowLeft size={24} color="#ffffff" />
+//         </TouchableOpacity>
+//         <View style={styles.headerContent}>
+//           <Text style={styles.headerTitle}>{t('handover_checklist')}</Text>
+//           <Text style={styles.headerSubtitle}>{currentFlat.flatNo} - {currentFlat.applicantName}</Text>
+//         </View>
+//       </LinearGradient>
+
+//       <View style={styles.progressContainer}>
+//         <View style={styles.progressHeader}>
+//           <Text style={styles.progressTitle}>{t('progress')}</Text>
+//           <Text style={styles.progressText}>{completedItems}/{totalItems} {t('completed')}</Text>
+//         </View>
+//         <View style={styles.progressBar}>
+//           <View style={[
+//             styles.progressFill, 
+//             { 
+//               width: `${progress}%`,
+//               backgroundColor: getProgressColor()
+//             }
+//           ]} />
+//         </View>
+//         <View style={styles.progressFooter}>
+//           <Text style={[styles.progressPercentage, { color: getProgressColor() }]}>
+//             {Math.round(progress)}%
+//           </Text>
+//           {progress < minimumCompletionPercentage && (
+//             <Text style={styles.minimumRequirement}>
+//               {t('minimum_completion_required')}
+//             </Text>
+//           )}
+//         </View>
+//       </View>
+
+//       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+//         <View style={styles.instructionsCard}>
+//           <Text style={styles.instructionsTitle}>{t('instructions')}</Text>
+//           <Text style={styles.instructionsText}>
+//             {t('instructions_text')}
+//           </Text>
+//         </View>
+
+//         {categories.map(renderCategoryItems)}
+
+//         <View style={styles.actionContainer}>
+//           {getActionButton()}
+//         </View>
+//       </ScrollView>
+
+//       {renderIncompleteDialog()}
+//     </SafeAreaView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f9fafb',
+//   },
+//   header: {
+//     paddingHorizontal: 24,
+//     paddingVertical: 20,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   backButton: {
+//     marginRight: 16,
+//   },
+//   headerContent: {
+//     flex: 1,
+//   },
+//   headerTitle: {
+//     fontSize: 20,
+//     fontFamily: 'Inter-Bold',
+//     color: '#ffffff',
+//   },
+//   headerSubtitle: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: 'rgba(255, 255, 255, 0.8)',
+//     marginTop: 2,
+//   },
+//   progressContainer: {
+//     backgroundColor: '#ffffff',
+//     padding: 20,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#e5e7eb',
+//   },
+//   progressHeader: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginBottom: 12,
+//   },
+//   progressTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#111827',
+//   },
+//   progressText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Medium',
+//     color: '#6b7280',
+//   },
+//   progressBar: {
+//     height: 8,
+//     backgroundColor: '#e5e7eb',
+//     borderRadius: 4,
+//     marginBottom: 8,
+//   },
+//   progressFill: {
+//     height: '100%',
+//     borderRadius: 4,
+//   },
+//   progressFooter: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//   },
+//   progressPercentage: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-SemiBold',
+//   },
+//   minimumRequirement: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-Medium',
+//     color: '#dc2626',
+//   },
+//   content: {
+//     flex: 1,
+//     paddingHorizontal: 24,
+//   },
+//   instructionsCard: {
+//     backgroundColor: '#eff6ff',
+//     borderRadius: 12,
+//     padding: 16,
+//     marginTop: 20,
+//     marginBottom: 24,
+//   },
+//   instructionsTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#1d4ed8',
+//     marginBottom: 8,
+//   },
+//   instructionsText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#1e40af',
+//     lineHeight: 20,
+//   },
+//   categorySection: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 12,
+//     marginBottom: 16,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 2,
+//   },
+//   categoryHeader: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     padding: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#f3f4f6',
+//   },
+//   categoryTitleContainer: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   categoryTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#111827',
+//     marginLeft: 8,
+//   },
+//   categoryProgress: {
+//     backgroundColor: '#f3f4f6',
+//     borderRadius: 12,
+//     paddingHorizontal: 8,
+//     paddingVertical: 4,
+//   },
+//   categoryProgressText: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#6b7280',
+//   },
+//   categoryItems: {
+//     padding: 16,
+//   },
+//   checklistItem: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'space-between',
+//     paddingVertical: 12,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#f9fafb',
+//   },
+//   itemLeft: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     flex: 1,
+//   },
+//   itemText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#111827',
+//     marginLeft: 12,
+//     flex: 1,
+//   },
+//   itemTextCompleted: {
+//     color: '#6b7280',
+//     textDecorationLine: 'line-through',
+//   },
+//   actionContainer: {
+//     paddingVertical: 24,
+//   },
+//   proceedButton: {
+//     backgroundColor: '#059669',
+//     borderRadius: 12,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 16,
+//   },
+//   proceedButtonText: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//     marginRight: 8,
+//   },
+//   reportButton: {
+//     backgroundColor: '#f59e0b',
+//     borderRadius: 12,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 16,
+//   },
+//   reportButtonText: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//     marginLeft: 8,
+//   },
+//   proceedIncompleteButton: {
+//     backgroundColor: '#f59e0b',
+//     borderRadius: 12,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 16,
+//   },
+//   proceedIncompleteButtonText: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//     marginRight: 8,
+//   },
+//   blockedContainer: {
+//     backgroundColor: '#fef2f2',
+//     borderRadius: 12,
+//     padding: 20,
+//     flexDirection: 'row',
+//     alignItems: 'flex-start',
+//     borderWidth: 1,
+//     borderColor: '#fecaca',
+//   },
+//   blockedTextContainer: {
+//     marginLeft: 12,
+//     flex: 1,
+//   },
+//   blockedTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#dc2626',
+//     marginBottom: 4,
+//   },
+//   blockedText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#b91c1c',
+//     lineHeight: 20,
+//   },
+//   dialogOverlay: {
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     right: 0,
+//     bottom: 0,
+//     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     zIndex: 1000,
+//   },
+//   dialogContainer: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 16,
+//     padding: 24,
+//     marginHorizontal: 24,
+//     maxWidth: 400,
+//     width: '100%',
+//   },
+//   dialogHeader: {
+//     alignItems: 'center',
+//     marginBottom: 16,
+//   },
+//   dialogTitle: {
+//     fontSize: 20,
+//     fontFamily: 'Inter-Bold',
+//     color: '#111827',
+//     marginTop: 8,
+//     textAlign: 'center',
+//   },
+//   dialogMessage: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#6b7280',
+//     textAlign: 'center',
+//     lineHeight: 20,
+//     marginBottom: 20,
+//   },
+//   incompleteItemsList: {
+//     backgroundColor: '#fef3c7',
+//     borderRadius: 8,
+//     padding: 12,
+//     marginBottom: 20,
+//   },
+//   incompleteItemsTitle: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#92400e',
+//     marginBottom: 8,
+//   },
+//   incompleteItem: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: 4,
+//   },
+//   incompleteItemText: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-Regular',
+//     color: '#a16207',
+//     marginLeft: 8,
+//     flex: 1,
+//   },
+//   moreItemsText: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-Medium',
+//     color: '#92400e',
+//     textAlign: 'center',
+//     marginTop: 4,
+//   },
+//   dialogActions: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     marginBottom: 12,
+//   },
+//   dialogButtonSecondary: {
+//     backgroundColor: '#fef2f2',
+//     borderRadius: 8,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 12,
+//     paddingHorizontal: 16,
+//     flex: 1,
+//     marginRight: 8,
+//   },
+//   dialogButtonSecondaryText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#dc2626',
+//     marginLeft: 6,
+//   },
+//   dialogButtonPrimary: {
+//     backgroundColor: '#f59e0b',
+//     borderRadius: 8,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 12,
+//     paddingHorizontal: 16,
+//     flex: 1,
+//     marginLeft: 8,
+//   },
+//   dialogButtonPrimaryText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//     marginLeft: 6,
+//   },
+//   dialogCloseButton: {
+//     alignItems: 'center',
+//     paddingVertical: 8,
+//   },
+//   dialogCloseText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Medium',
+//     color: '#6b7280',
+//   },
+// });
+
+
+// import React, { useState } from 'react';
+// import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+// import { Picker } from '@react-native-picker/picker';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { useLocalSearchParams, useRouter } from 'expo-router';
+// import { useApp } from '@/contexts/AppContext';
+// import { ArrowLeft, ArrowRight,  Zap, Wrench, DoorOpen, Palette, Edit2, Trash2, Notebook } from 'lucide-react-native';
+
+// const categoryIcons = {
+//   'Electrical': Zap,
+//   'Plumbing': Wrench,
+//   'Doors & Windows': DoorOpen,
+//   'Walls & Flooring': Palette,
+//   'Kitchen & Bathroom': Wrench,
+// };
+
+// const availableCategories = [
+//   'Electrical',
+//   'Plumbing',
+//   'Doors & Windows',
+//   'Walls & Flooring',
+//   'Kitchen & Bathroom',
+// ];
+
+// export default function SnaggingReportScreen() {
+//   const { applicationId } = useLocalSearchParams();
+//   const router = useRouter();
+//   const { currentFlat, snaggingNotes, addSnaggingNote, editSnaggingNote, deleteSnaggingNote, t } = useApp();
+//   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+//   const [newNote, setNewNote] = useState<string>('');
+//   const [selectedCategory, setSelectedCategory] = useState<string>(availableCategories[0]);
+//   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+//   const [editNoteText, setEditNoteText] = useState<string>('');
+
+//   if (!currentFlat) {
+//     return (
+//       <SafeAreaView style={styles.container}>
+//         <Text>No flat selected</Text>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   const categories = [...new Set(snaggingNotes.map(item => item.category))];
+//   const totalNotes = snaggingNotes.length;
+
+//   const handleAddNote = () => {
+//     if (newNote.trim() && selectedCategory) {
+//       addSnaggingNote({
+//         id: Date.now().toString(),
+//         category: selectedCategory,
+//         note: newNote.trim(),
+//         timestamp: new Date().toISOString(),
+//       });
+//       setNewNote('');
+//       setSelectedCategory(availableCategories[0]);
+//     }
+//   };
+
+//   const handleEditNote = (note: { id: string; category: string; note: string }) => {
+//     setEditingNoteId(note.id);
+//     setEditNoteText(note.note);
+//     setSelectedCategory(note.category);
+//   };
+
+//   const handleSaveEdit = (id: string) => {
+//     if (editNoteText.trim() && selectedCategory) {
+//       editSnaggingNote(id, {
+//         category: selectedCategory,
+//         note: editNoteText.trim(),
+//       });
+//       setEditingNoteId(null);
+//       setEditNoteText('');
+//       setSelectedCategory(availableCategories[0]);
+//     }
+//   };
+
+//   const handleDeleteNote = (id: string) => {
+//     deleteSnaggingNote(id);
+//   };
+
+//   const renderCategoryNotes = (category: string) => {
+//     const categoryNotes = snaggingNotes.filter(item => item.category === category);
+
+//     return (
+//       <View key={category} style={styles.categorySection}>
+//         <TouchableOpacity
+//           style={styles.categoryHeader}
+//           onPress={() => setExpandedCategory(expandedCategory === category ? null : category)}
+//         >
+//           <View style={styles.categoryTitleContainer}>
+//             {categoryIcons[category as keyof typeof categoryIcons] &&
+//               React.createElement(categoryIcons[category as keyof typeof categoryIcons], {
+//                 size: 20,
+//                 color: '#2563eb',
+//               })}
+//             <Text style={styles.categoryTitle}>{t(category.toLowerCase().replace(/\s+/g, '_').replace('&', ''))}</Text>
+//           </View>
+//           <View style={styles.categoryCount}>
+//             <Text style={styles.categoryCountText}>{categoryNotes.length} {t('notes')}</Text>
+//           </View>
+//         </TouchableOpacity>
+
+//         {(expandedCategory === category || expandedCategory === null) && (
+//           <View style={styles.categoryNotes}>
+//             {categoryNotes.map((item) => (
+//               <View key={item.id} style={styles.noteItem}>
+//                 <Notebook size={20} color="#f59e0b" />
+//                 <View style={styles.noteContent}>
+//                   {editingNoteId === item.id ? (
+//                     <View style={styles.editContainer}>
+//                       <Picker
+//                         selectedValue={selectedCategory}
+//                         style={styles.categoryPicker}
+//                         onValueChange={(value:any) => setSelectedCategory(value)}
+//                       >
+//                         {availableCategories.map((cat) => (
+//                           <Picker.Item key={cat} label={t(cat.toLowerCase().replace(/\s+/g, '_').replace('&', ''))} value={cat} />
+//                         ))}
+//                       </Picker>
+//                       <TextInput
+//                         style={styles.noteInput}
+//                         value={editNoteText}
+//                         onChangeText={setEditNoteText}
+//                         multiline
+//                       />
+//                       <View style={styles.editActions}>
+//                         <TouchableOpacity
+//                           style={[styles.actionButton, styles.saveButton]}
+//                           onPress={() => handleSaveEdit(item.id)}
+//                         >
+//                           <Text style={styles.actionButtonText}>{t('save')}</Text>
+//                         </TouchableOpacity>
+//                         <TouchableOpacity
+//                           style={[styles.actionButton, styles.cancelButton]}
+//                           onPress={() => setEditingNoteId(null)}
+//                         >
+//                           <Text style={styles.actionButtonText}>{t('cancel')}</Text>
+//                         </TouchableOpacity>
+//                       </View>
+//                     </View>
+//                   ) : (
+//                     <>
+//                       <Text style={styles.noteText}>{item.note}</Text>
+//                       <Text style={styles.noteTimestamp}>
+//                         {new Date(item.timestamp).toLocaleDateString()}
+//                       </Text>
+//                       <View style={styles.noteActions}>
+//                         <TouchableOpacity
+//                           style={styles.actionButton}
+//                           onPress={() => handleEditNote(item)}
+//                         >
+//                           <Edit2 size={16} color="#2563eb" />
+//                         </TouchableOpacity>
+//                         <TouchableOpacity
+//                           style={styles.actionButton}
+//                           onPress={() => handleDeleteNote(item.id)}
+//                         >
+//                           <Trash2 size={16} color="#dc2626" />
+//                         </TouchableOpacity>
+//                       </View>
+//                     </>
+//                   )}
+//                 </View>
+//               </View>
+//             ))}
+//           </View>
+//         )}
+//       </View>
+//     );
+//   };
+
+//   const handleSubmitReport = () => {
+//     router.push(`/signature/${applicationId}`);
+//   };
+
+//   return (
+//     <SafeAreaView style={styles.container}>
+//       <LinearGradient
+//         colors={['#1e40af', '#2563eb']}
+//         style={styles.header}
+//       >
+//         <TouchableOpacity
+//           style={styles.backButton}
+//           onPress={() => router.back()}
+//         >
+//           <ArrowLeft size={24} color="# worlds" />
+//         </TouchableOpacity>
+//         <View style={styles.headerContent}>
+//           <Text style={styles.headerTitle}>{t('snagging_report')}</Text>
+//           <Text style={styles.headerSubtitle}>{currentFlat.flatNo} - {currentFlat.applicantName}</Text>
+//         </View>
+//       </LinearGradient>
+
+//       <View style={styles.summaryContainer}>
+//         <Text style={styles.summaryTitle}>{t('snagging_summary')}</Text>
+//         <Text style={styles.summaryText}>
+//           {t('total_notes').replace('{count}', totalNotes.toString())}
+//         </Text>
+//       </View>
+
+//       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+//         <View style={styles.instructionsCard}>
+//           <Text style={styles.instructionsTitle}>{t('instructions')}</Text>
+//           <Text style={styles.instructionsText}>
+//             {t('snagging_instructions_text')}
+//           </Text>
+//         </View>
+
+//         <View style={styles.noteInputContainer}>
+//           <Text style={styles.inputLabel}>{t('select_category')}</Text>
+//           <Picker
+//             selectedValue={selectedCategory}
+//             style={styles.categoryPicker}
+//             onValueChange={(value:any) => setSelectedCategory(value)}
+//           >
+//             {availableCategories.map((category) => (
+//               <Picker.Item
+//                 key={category}
+//                 label={t(category.toLowerCase().replace(/\s+/g, '_').replace('&', ''))}
+//                 value={category}
+//               />
+//             ))}
+//           </Picker>
+//           <TextInput
+//             style={styles.noteInput}
+//             placeholder={t('add_note_placeholder')}
+//             value={newNote}
+//             onChangeText={setNewNote}
+//             multiline
+//           />
+//           <TouchableOpacity
+//             style={[styles.addNoteButton, !newNote.trim() && styles.disabledButton]}
+//             onPress={handleAddNote}
+//             disabled={!newNote.trim()}
+//           >
+//             <Text style={styles.addNoteButtonText}>{t('add_note')}</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {categories.map(renderCategoryNotes)}
+
+//         <View style={styles.actionContainer}>
+//           <TouchableOpacity
+//             style={styles.submitButton}
+//             onPress={handleSubmitReport}
+//           >
+//             <Text style={styles.submitButtonText}>{t('submit_report')}</Text>
+//             <ArrowRight size={20} color="#ffffff" />
+//           </TouchableOpacity>
+//         </View>
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f9fafb',
+//   },
+//   header: {
+//     paddingHorizontal: 24,
+//     paddingVertical: 20,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   backButton: {
+//     marginRight: 16,
+//   },
+//   headerContent: {
+//     flex: 1,
+//   },
+//   headerTitle: {
+//     fontSize: 20,
+//     fontFamily: 'Inter-Bold',
+//     color: '#ffffff',
+//   },
+//   headerSubtitle: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: 'rgba(255, 255, 255, 0.8)',
+//     marginTop: 2,
+//   },
+//   summaryContainer: {
+//     backgroundColor: '#ffffff',
+//     padding: 20,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#e5e7eb',
+//   },
+//   summaryTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#111827',
+//     marginBottom: 8,
+//   },
+//   summaryText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Medium',
+//     color: '#6b7280',
+//   },
+//   content: {
+//     flex: 1,
+//     paddingHorizontal: 24,
+//   },
+//   instructionsCard: {
+//     backgroundColor: '#eff6ff',
+//     borderRadius: 12,
+//     padding: 16,
+//     marginTop: 20,
+//     marginBottom: 24,
+//   },
+//   instructionsTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#1d4ed8',
+//     marginBottom: 8,
+//   },
+//   instructionsText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#1e40af',
+//     lineHeight: 20,
+//   },
+//   noteInputContainer: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 12,
+//     padding: 16,
+//     marginBottom: 16,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 2,
+//   },
+//   inputLabel: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#111827',
+//     marginBottom: 8,
+//   },
+//   categoryPicker: {
+//     height: 80,
+//     width: '100%',
+//     marginBottom: 8,
+//   },
+//   noteInput: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#111827',
+//     minHeight: 60,
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb',
+//     borderRadius: 8,
+//     padding: 8,
+//     marginBottom: 8,
+//   },
+//   addNoteButton: {
+//     backgroundColor: '#2563eb',
+//     borderRadius: 8,
+//     paddingVertical: 8,
+//     paddingHorizontal: 16,
+//     alignSelf: 'flex-end',
+//   },
+//   disabledButton: {
+//     backgroundColor: '#9ca3af',
+//   },
+//   addNoteButtonText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//   },
+//   categorySection: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 12,
+//     marginBottom: 16,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 2,
+//   },
+//   categoryHeader: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     padding: 16,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#f3f4f6',
+//   },
+//   categoryTitleContainer: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   categoryTitle: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#111827',
+//     marginLeft: 8,
+//   },
+//   categoryCount: {
+//     backgroundColor: '#f3f4f6',
+//     borderRadius: 12,
+//     paddingHorizontal: 8,
+//     paddingVertical: 4,
+//   },
+//   categoryCountText: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#6b7280',
+//   },
+//   categoryNotes: {
+//     padding: 16,
+//   },
+//   noteItem: {
+//     flexDirection: 'row',
+//     alignItems: 'flex-start',
+//     paddingVertical: 12,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#f9fafb',
+//   },
+//   noteContent: {
+//     flex: 1,
+//     marginLeft: 12,
+//   },
+//   noteText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-Regular',
+//     color: '#111827',
+//     marginBottom: 4,
+//   },
+//   noteTimestamp: {
+//     fontSize: 12,
+//     fontFamily: 'Inter-Regular',
+//     color: '#6b7280',
+//   },
+//   noteActions: {
+//     flexDirection: 'row',
+//     marginTop: 8,
+//   },
+//   editContainer: {
+//     flex: 1,
+//   },
+//   editActions: {
+//     flexDirection: 'row',
+//     justifyContent: 'flex-end',
+//   },
+//   actionButton: {
+//     padding: 8,
+//     marginLeft: 8,
+//   },
+//   saveButton: {
+//     backgroundColor: '#2563eb',
+//     borderRadius: 8,
+//     paddingVertical: 8,
+//     paddingHorizontal: 16,
+//   },
+//   cancelButton: {
+//     backgroundColor: '#6b7280',
+//     borderRadius: 8,
+//     paddingVertical: 8,
+//     paddingHorizontal: 16,
+//     marginLeft: 8,
+//   },
+//   actionButtonText: {
+//     fontSize: 14,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//   },
+//   actionContainer: {
+//     paddingVertical: 24,
+//   },
+//   submitButton: {
+//     backgroundColor: '#059669',
+//     borderRadius: 12,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 16,
+//   },
+//   submitButtonText: {
+//     fontSize: 16,
+//     fontFamily: 'Inter-SemiBold',
+//     color: '#ffffff',
+//     marginRight: 8,
+//   },
+// });
+
+
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, Image } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
-import { CircleCheck as CheckCircle, Circle, ArrowLeft, ArrowRight, TriangleAlert as AlertTriangle, Zap, Wrench, DoorOpen, Palette, Clock, X } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Zap, Wrench, DoorOpen, Palette, Edit2, Trash2, Notebook, Camera, Upload } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 const categoryIcons = {
   'Electrical': Zap,
@@ -676,12 +1831,25 @@ const categoryIcons = {
   'Kitchen & Bathroom': Wrench,
 };
 
-export default function ChecklistScreen() {
+const availableCategories = [
+  'Electrical',
+  'Plumbing',
+  'Doors & Windows',
+  'Walls & Flooring',
+  'Kitchen & Bathroom',
+];
+
+export default function SnaggingReportScreen() {
   const { applicationId } = useLocalSearchParams();
   const router = useRouter();
-  const { currentFlat, checklist, updateChecklistItem, t } = useApp();
+  const { currentFlat, snaggingNotes, addSnaggingNote, editSnaggingNote, deleteSnaggingNote, t } = useApp();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
+  const [newNote, setNewNote] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(availableCategories[0]);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editNoteText, setEditNoteText] = useState<string>('');
+  const [signedReport, setSignedReport] = useState<string | null>(null);
+  const [inventoryList, setInventoryList] = useState<string | null>(null);
 
   if (!currentFlat) {
     return (
@@ -691,98 +1859,180 @@ export default function ChecklistScreen() {
     );
   }
 
-  const categories = [...new Set(checklist.map(item => item.category))];
-  const completedItems = checklist.filter(item => item.checked).length;
-  const totalItems = checklist.length;
-  const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-  const hasIssues = checklist.some(item => !item.checked && item.issue);
-  const incompleteItems = checklist.filter(item => !item.checked);
-  
-  // 70% completion requirement
-  const minimumCompletionPercentage = 70;
-  const canProceedWithHandover = progress >= minimumCompletionPercentage;
+  const categories = [...new Set(snaggingNotes.map(item => item.category))];
+  const totalNotes = snaggingNotes.length;
 
-  const handleItemToggle = (itemId: string, checked: boolean) => {
-    updateChecklistItem(itemId, checked);
-  };
+  const pickDocument = async (type: 'report' | 'inventory') => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert(t('permission_denied'));
+      return;
+    }
 
-  const handleProceed = () => {
-    if (completedItems === totalItems) {
-      router.push(`/signature/${applicationId}`);
-    } else if (hasIssues) {
-      router.push(`/complaint/${applicationId}`);
-    } else if (canProceedWithHandover) {
-      setShowIncompleteDialog(true);
-    } else {
-      Alert.alert(
-        t('insufficient_completion'),
-        t('insufficient_completion_message').replace('{percent}', Math.round(progress).toString()),
-        [{ text: t('ok') }]
-      );
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      if (type === 'report') {
+        setSignedReport(result.assets[0].uri);
+      } else {
+        setInventoryList(result.assets[0].uri);
+      }
     }
   };
 
-  const handleProceedWithIncomplete = () => {
-    setShowIncompleteDialog(false);
-    router.push(`/signature/${applicationId}`);
+  const captureDocument = async (type: 'report' | 'inventory') => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert(t('permission_denied'));
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      if (type === 'report') {
+        setSignedReport(result.assets[0].uri);
+      } else {
+        setInventoryList(result.assets[0].uri);
+      }
+    }
   };
 
-  const handleHoldHandover = () => {
-    setShowIncompleteDialog(false);
-    router.push(`/complaint/${applicationId}`);
+  const deleteDocument = (type: 'report' | 'inventory') => {
+    if (type === 'report') {
+      setSignedReport(null);
+    } else {
+      setInventoryList(null);
+    }
   };
 
-  const renderCategoryItems = (category: string) => {
-    const categoryItems = checklist.filter(item => item.category === category);
-    const completedCategoryItems = categoryItems.filter(item => item.checked).length;
-    
+  const handleAddNote = () => {
+    if (newNote.trim() && selectedCategory) {
+      addSnaggingNote({
+        id: Date.now().toString(),
+        category: selectedCategory,
+        note: newNote.trim(),
+        timestamp: new Date().toISOString(),
+      });
+      setNewNote('');
+      setSelectedCategory(availableCategories[0]);
+    }
+  };
+
+  const handleEditNote = (note: { id: string; category: string; note: string }) => {
+    setEditingNoteId(note.id);
+    setEditNoteText(note.note);
+    setSelectedCategory(note.category);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    if (editNoteText.trim() && selectedCategory) {
+      editSnaggingNote(id, {
+        category: selectedCategory,
+        note: editNoteText.trim(),
+      });
+      setEditingNoteId(null);
+      setEditNoteText('');
+      setSelectedCategory(availableCategories[0]);
+    }
+  };
+
+  const handleDeleteNote = (id: string) => {
+    deleteSnaggingNote(id);
+  };
+
+  const renderCategoryNotes = (category: string) => {
+    const categoryNotes = snaggingNotes.filter(item => item.category === category);
+
     return (
       <View key={category} style={styles.categorySection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.categoryHeader}
           onPress={() => setExpandedCategory(expandedCategory === category ? null : category)}
         >
           <View style={styles.categoryTitleContainer}>
-            {categoryIcons[category as keyof typeof categoryIcons] && 
-              React.createElement(categoryIcons[category as keyof typeof categoryIcons], { 
-                size: 20, 
-                color: '#2563eb' 
-              })
-            }
+            {categoryIcons[category as keyof typeof categoryIcons] &&
+              React.createElement(categoryIcons[category as keyof typeof categoryIcons], {
+                size: 20,
+                color: '#2563eb',
+              })}
             <Text style={styles.categoryTitle}>{t(category.toLowerCase().replace(/\s+/g, '_').replace('&', ''))}</Text>
           </View>
-          <View style={styles.categoryProgress}>
-            <Text style={styles.categoryProgressText}>
-              {completedCategoryItems}/{categoryItems.length}
-            </Text>
+          <View style={styles.categoryCount}>
+            <Text style={styles.categoryCountText}>{categoryNotes.length} {t('notes')}</Text>
           </View>
         </TouchableOpacity>
 
         {(expandedCategory === category || expandedCategory === null) && (
-          <View style={styles.categoryItems}>
-            {categoryItems.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.checklistItem}
-                onPress={() => handleItemToggle(item.id, !item.checked)}
-              >
-                <View style={styles.itemLeft}>
-                  {item.checked ? (
-                    <CheckCircle size={24} color="#059669" />
+          <View style={styles.categoryNotes}>
+            {categoryNotes.map((item) => (
+              <View key={item.id} style={styles.noteItem}>
+                <Notebook size={20} color="#f59e0b" />
+                <View style={styles.noteContent}>
+                  {editingNoteId === item.id ? (
+                    <View style={styles.editContainer}>
+                      <Picker
+                        selectedValue={selectedCategory}
+                        style={styles.categoryPicker}
+                        onValueChange={(value: any) => setSelectedCategory(value)}
+                      >
+                        {availableCategories.map((cat) => (
+                          <Picker.Item key={cat} label={t(cat.toLowerCase().replace(/\s+/g, '_').replace('&', ''))} value={cat} />
+                        ))}
+                      </Picker>
+                      <TextInput
+                        style={styles.noteInput}
+                        value={editNoteText}
+                        onChangeText={setEditNoteText}
+                        multiline
+                      />
+                      <View style={styles.editActions}>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.saveButton]}
+                          onPress={() => handleSaveEdit(item.id)}
+                        >
+                          <Text style={styles.actionButtonText}>{t('save')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.cancelButton]}
+                          onPress={() => setEditingNoteId(null)}
+                        >
+                          <Text style={styles.actionButtonText}>{t('cancel')}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   ) : (
-                    <Circle size={24} color="#d1d5db" />
+                    <>
+                      <Text style={styles.noteText}>{item.note}</Text>
+                      <Text style={styles.noteTimestamp}>
+                        {new Date(item.timestamp).toLocaleDateString()}
+                      </Text>
+                      <View style={styles.noteActions}>
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() => handleEditNote(item)}
+                        >
+                          <Edit2 size={16} color="#2563eb" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() => handleDeleteNote(item.id)}
+                        >
+                          <Trash2 size={16} color="#dc2626" />
+                        </TouchableOpacity>
+                      </View>
+                    </>
                   )}
-                  <Text style={[
-                    styles.itemText,
-                    item.checked && styles.itemTextCompleted
-                  ]}>
-                    {t(item.item)}
-                  </Text>
                 </View>
-                {item.issue && (
-                  <AlertTriangle size={16} color="#f59e0b" />
-                )}
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         )}
@@ -790,121 +2040,12 @@ export default function ChecklistScreen() {
     );
   };
 
-  const renderIncompleteDialog = () => {
-    if (!showIncompleteDialog) return null;
-
-    return (
-      <View style={styles.dialogOverlay}>
-        <View style={styles.dialogContainer}>
-          <View style={styles.dialogHeader}>
-            <AlertTriangle size={32} color="#f59e0b" />
-            <Text style={styles.dialogTitle}>{t('proceed_with_incomplete')}</Text>
-          </View>
-
-          <Text style={styles.dialogMessage}>
-            {t('incomplete_dialog_message')
-              .replace('{count}', incompleteItems.length.toString())
-              .replace('{percent}', Math.round(progress).toString())}
-          </Text>
-
-          <View style={styles.incompleteItemsList}>
-            <Text style={styles.incompleteItemsTitle}>{t('incomplete_items')}</Text>
-            {incompleteItems.slice(0, 3).map((item) => (
-              <View key={item.id} style={styles.incompleteItem}>
-                <Circle size={16} color="#f59e0b" />
-                <Text style={styles.incompleteItemText}>{t(item.item)}</Text>
-              </View>
-            ))}
-            {incompleteItems.length > 3 && (
-              <Text style={styles.moreItemsText}>
-                {t('more_items').replace('{count}', (incompleteItems.length - 3).toString())}
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.dialogActions}>
-            <TouchableOpacity 
-              style={styles.dialogButtonSecondary}
-              onPress={handleHoldHandover}
-            >
-              <Clock size={16} color="#dc2626" />
-              <Text style={styles.dialogButtonSecondaryText}>{t('hold_handover')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.dialogButtonPrimary}
-              onPress={handleProceedWithIncomplete}
-            >
-              <ArrowRight size={16} color="#ffffff" />
-              <Text style={styles.dialogButtonPrimaryText}>{t('proceed_anyway')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.dialogCloseButton}
-            onPress={() => setShowIncompleteDialog(false)}
-          >
-            <Text style={styles.dialogCloseText}>{t('cancel')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
-  const getProgressColor = () => {
-    if (progress >= minimumCompletionPercentage) return '#059669';
-    if (progress >= 50) return '#f59e0b';
-    return '#dc2626';
-  };
-
-  const getActionButton = () => {
-    if (completedItems === totalItems) {
-      return (
-        <TouchableOpacity 
-          style={styles.proceedButton}
-          onPress={handleProceed}
-        >
-          <Text style={styles.proceedButtonText}>{t('proceed_to_signature')}</Text>
-          <ArrowRight size={20} color="#ffffff" />
-        </TouchableOpacity>
-      );
-    } else if (hasIssues) {
-      return (
-        <TouchableOpacity 
-          style={styles.reportButton}
-          onPress={handleProceed}
-        >
-          <AlertTriangle size={20} color="#ffffff" />
-          <Text style={styles.reportButtonText}>{t('report_issues')}</Text>
-        </TouchableOpacity>
-      );
-    } else if (canProceedWithHandover) {
-      return (
-        <TouchableOpacity 
-          style={styles.proceedIncompleteButton}
-          onPress={handleProceed}
-        >
-          <Text style={styles.proceedIncompleteButtonText}>
-            {t('continue_with_incomplete').replace('{count}', incompleteItems.length.toString())}
-          </Text>
-          <ArrowRight size={20} color="#ffffff" />
-        </TouchableOpacity>
-      );
-    } else {
-      return (
-        <View style={styles.blockedContainer}>
-          <X size={24} color="#dc2626" />
-          <View style={styles.blockedTextContainer}>
-            <Text style={styles.blockedTitle}>
-              {t('minimum_completion_required')}
-            </Text>
-            <Text style={styles.blockedText}>
-              {t('complete_more_items').replace('{count}', (Math.ceil((minimumCompletionPercentage / 100) * totalItems) - completedItems).toString())}
-            </Text>
-          </View>
-        </View>
-      );
+  const handleSubmitReport = () => {
+    if (!signedReport || !inventoryList) {
+      alert(t('missing_documents'));
+      return;
     }
+    router.push(`/signature/${applicationId}`);
   };
 
   return (
@@ -913,60 +2054,154 @@ export default function ChecklistScreen() {
         colors={['#1e40af', '#2563eb']}
         style={styles.header}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>{t('handover_checklist')}</Text>
+          <Text style={styles.headerTitle}>{t('snagging_report')}</Text>
           <Text style={styles.headerSubtitle}>{currentFlat.flatNo} - {currentFlat.applicantName}</Text>
         </View>
       </LinearGradient>
 
-      <View style={styles.progressContainer}>
-        <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>{t('progress')}</Text>
-          <Text style={styles.progressText}>{completedItems}/{totalItems} {t('completed')}</Text>
-        </View>
-        <View style={styles.progressBar}>
-          <View style={[
-            styles.progressFill, 
-            { 
-              width: `${progress}%`,
-              backgroundColor: getProgressColor()
-            }
-          ]} />
-        </View>
-        <View style={styles.progressFooter}>
-          <Text style={[styles.progressPercentage, { color: getProgressColor() }]}>
-            {Math.round(progress)}%
-          </Text>
-          {progress < minimumCompletionPercentage && (
-            <Text style={styles.minimumRequirement}>
-              {t('minimum_completion_required')}
-            </Text>
-          )}
-        </View>
+      <View style={styles.summaryContainer}>
+        <Text style={styles.summaryTitle}>{t('snagging_summary')}</Text>
+        <Text style={styles.summaryText}>
+          {t('total_notes').replace('{count}', totalNotes.toString())}
+        </Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.instructionsCard}>
           <Text style={styles.instructionsTitle}>{t('instructions')}</Text>
           <Text style={styles.instructionsText}>
-            {t('instructions_text')}
+            {t('snagging_instructions_text')}
           </Text>
         </View>
 
-        {categories.map(renderCategoryItems)}
+        <View style={styles.noteInputContainer}>
+          <Text style={styles.inputLabel}>{t('select_category')}</Text>
+          <Picker
+            selectedValue={selectedCategory}
+            style={styles.categoryPicker}
+            onValueChange={(value: any) => setSelectedCategory(value)}
+          >
+            {availableCategories.map((category) => (
+              <Picker.Item
+                key={category}
+                label={t(category.toLowerCase().replace(/\s+/g, '_').replace('&', ''))}
+                value={category}
+              />
+            ))}
+          </Picker>
+          <TextInput
+            style={styles.noteInput}
+            placeholder={t('add_note_placeholder')}
+            value={newNote}
+            onChangeText={setNewNote}
+            multiline
+          />
+          <TouchableOpacity
+            style={[styles.addNoteButton, !newNote.trim() && styles.disabledButton]}
+            onPress={handleAddNote}
+            disabled={!newNote.trim()}
+          >
+            <Text style={styles.addNoteButtonText}>{t('add_note')}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.documentUploadContainer}>
+          <View style={styles.documentSection}>
+            <Text style={styles.documentSectionTitle}>{t('Upload Signed Snagging Report')}</Text>
+            <View style={styles.documentButtonGroup}>
+              <TouchableOpacity
+                style={[styles.documentButton, signedReport && styles.uploadedButton]}
+                onPress={() => captureDocument('report')}
+              >
+                <Camera size={20} color={signedReport ? '#059669' : '#2563eb'} />
+                <Text style={[styles.documentButtonText, signedReport && styles.uploadedText]}>
+                  {signedReport ? t('Snagging Report Captured') : t('Upload Signed Snagging Report')}
+                </Text>
+              </TouchableOpacity>
+              
+            </View>
+            {signedReport && (
+              <View style={styles.previewContainer}>
+                <Image source={{ uri: signedReport }} style={styles.previewImage} />
+                <View style={styles.previewActions}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={() => deleteDocument('report')}
+                  >
+                    <Trash2 size={16} color="#dc2626" />
+                    <Text style={styles.actionButtonText}>{t('delete')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.reuploadButton]}
+                    onPress={() => pickDocument('report')}
+                  >
+                    <Upload size={16} color="#2563eb" />
+                    <Text style={styles.actionButtonText}>{t('Reupload')}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.documentSection}>
+            <Text style={styles.documentSectionTitle}>{t('Upload Signed Inventory List')}</Text>
+            <View style={styles.documentButtonGroup}>
+              <TouchableOpacity
+                style={[styles.documentButton, inventoryList && styles.uploadedButton]}
+                onPress={() => captureDocument('inventory')}
+              >
+                <Camera size={20} color={inventoryList ? '#059669' : '#2563eb'} />
+                <Text style={[styles.documentButtonText, inventoryList && styles.uploadedText]}>
+                  {inventoryList ? t('inventory_list_captured') : t('Upload Signed Inventory List')}
+                </Text>
+              </TouchableOpacity>
+            
+            </View>
+            {inventoryList && (
+              <View style={styles.previewContainer}>
+                <Image source={{ uri: inventoryList }} style={styles.previewImage} />
+                <View style={styles.previewActions}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={() => deleteDocument('inventory')}
+                  >
+                    <Trash2 size={16} color="#dc2626" />
+                    <Text style={styles.actionButtonText}>{t('delete')}</Text>
+                  </TouchableOpacity>
+                   <TouchableOpacity
+                    style={[styles.actionButton, styles.reuploadButton]}
+                    onPress={() => pickDocument('report')}
+                  >
+                    <Upload size={16} color="#2563eb" />
+                    <Text style={styles.actionButtonText}>{t('Reupload')}</Text>
+                  </TouchableOpacity>
+                 
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {categories.map(renderCategoryNotes)}
 
         <View style={styles.actionContainer}>
-          {getActionButton()}
+          <TouchableOpacity
+            style={[styles.submitButton, (!signedReport || !inventoryList) && styles.disabledButton]}
+            onPress={handleSubmitReport}
+            disabled={!signedReport || !inventoryList}
+          >
+            <Text style={styles.submitButtonText}>{t('submit_report')}</Text>
+            <ArrowRight size={20} color="#ffffff" />
+          </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {renderIncompleteDialog()}
     </SafeAreaView>
   );
 }
@@ -999,51 +2234,22 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
   },
-  progressContainer: {
+  summaryContainer: {
     backgroundColor: '#ffffff',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  progressTitle: {
+  summaryTitle: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#111827',
+    marginBottom: 8,
   },
-  progressText: {
+  summaryText: {
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     color: '#6b7280',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  progressPercentage: {
-    fontSize: 12,
-    fontFamily: 'Inter-SemiBold',
-  },
-  minimumRequirement: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#dc2626',
   },
   content: {
     flex: 1,
@@ -1067,6 +2273,132 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#1e40af',
     lineHeight: 20,
+  },
+  noteInputContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  documentUploadContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  documentSection: {
+    marginBottom: 16,
+  },
+  documentSectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  documentButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  documentButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eff6ff',
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 4,
+  },
+  uploadedButton: {
+    backgroundColor: '#ecfdf5',
+  },
+  documentButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#2563eb',
+    marginLeft: 8,
+  },
+  uploadedText: {
+    color: '#059669',
+  },
+  previewContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  previewImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  previewActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#ed7c7cff',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reuploadButton: {
+    backgroundColor: '#709ad4ff',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  categoryPicker: {
+    height: 80,
+    width: '100%',
+    marginBottom: 8,
+  },
+  noteInput: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#111827',
+    minHeight: 60,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+  },
+  addNoteButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignSelf: 'flex-end',
+  },
+  disabledButton: {
+    backgroundColor: '#9ca3af',
+  },
+  addNoteButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#ffffff',
   },
   categorySection: {
     backgroundColor: '#ffffff',
@@ -1096,48 +2428,80 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginLeft: 8,
   },
-  categoryProgress: {
+  categoryCount: {
     backgroundColor: '#f3f4f6',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  categoryProgressText: {
+  categoryCountText: {
     fontSize: 12,
     fontFamily: 'Inter-SemiBold',
     color: '#6b7280',
   },
-  categoryItems: {
+  categoryNotes: {
     padding: 16,
   },
-  checklistItem: {
+  noteItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f9fafb',
   },
-  itemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  noteContent: {
     flex: 1,
+    marginLeft: 12,
   },
-  itemText: {
+  noteText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#111827',
-    marginLeft: 12,
+    marginBottom: 4,
+  },
+  noteTimestamp: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#6b7280',
+  },
+  noteActions: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  editContainer: {
     flex: 1,
   },
-  itemTextCompleted: {
-    color: '#6b7280',
-    textDecorationLine: 'line-through',
+  editActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  saveButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#6b7280',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginLeft: 8,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#ffffff',
+    marginLeft: 4,
   },
   actionContainer: {
     paddingVertical: 24,
   },
-  proceedButton: {
+  submitButton: {
     backgroundColor: '#059669',
     borderRadius: 12,
     flexDirection: 'row',
@@ -1145,180 +2509,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
   },
-  proceedButtonText: {
+  submitButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#ffffff',
     marginRight: 8,
-  },
-  reportButton: {
-    backgroundColor: '#f59e0b',
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  reportButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#ffffff',
-    marginLeft: 8,
-  },
-  proceedIncompleteButton: {
-    backgroundColor: '#f59e0b',
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  proceedIncompleteButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#ffffff',
-    marginRight: 8,
-  },
-  blockedContainer: {
-    backgroundColor: '#fef2f2',
-    borderRadius: 12,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#fecaca',
-  },
-  blockedTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  blockedTitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#dc2626',
-    marginBottom: 4,
-  },
-  blockedText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#b91c1c',
-    lineHeight: 20,
-  },
-  dialogOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  dialogContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
-    marginHorizontal: 24,
-    maxWidth: 400,
-    width: '100%',
-  },
-  dialogHeader: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  dialogTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter-Bold',
-    color: '#111827',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  dialogMessage: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6b7280',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  incompleteItemsList: {
-    backgroundColor: '#fef3c7',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-  },
-  incompleteItemsTitle: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-    color: '#92400e',
-    marginBottom: 8,
-  },
-  incompleteItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  incompleteItemText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Regular',
-    color: '#a16207',
-    marginLeft: 8,
-    flex: 1,
-  },
-  moreItemsText: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#92400e',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  dialogActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  dialogButtonSecondary: {
-    backgroundColor: '#fef2f2',
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flex: 1,
-    marginRight: 8,
-  },
-  dialogButtonSecondaryText: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-    color: '#dc2626',
-    marginLeft: 6,
-  },
-  dialogButtonPrimary: {
-    backgroundColor: '#f59e0b',
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flex: 1,
-    marginLeft: 8,
-  },
-  dialogButtonPrimaryText: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-    color: '#ffffff',
-    marginLeft: 6,
-  },
-  dialogCloseButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  dialogCloseText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#6b7280',
   },
 });

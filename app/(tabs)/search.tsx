@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal,Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
 import { Search, Chrome as Home, MapPin, Calendar, User, ArrowRight, CircleAlert as AlertCircle, Phone, Hash, Globe, QrCode, X } from 'lucide-react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import LoginIcon from '../components/LoginIcon';
 
 export default function SearchScreen() {
   const [searchValue, setSearchValue] = useState('');
@@ -14,7 +15,7 @@ export default function SearchScreen() {
   const [error, setError] = useState('');
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const { searchFlat, setCurrentFlat, currentFlat, resetChecklist, language, setLanguage, t } = useApp();
+  const { searchFlat, setCurrentFlat, currentFlat, language, setLanguage, t } = useApp();
   const router = useRouter();
 
   const handleSearch = async () => {
@@ -41,7 +42,7 @@ export default function SearchScreen() {
       
       if (flat) {
         setCurrentFlat(flat);
-        resetChecklist();
+        // resetChecklist();
         setError('');
       } else {
         const errorKey = (searchType === 'application' || searchType === 'barcode') ? 'no_flat_found_app' : 'no_flat_found_mobile';
@@ -107,7 +108,7 @@ export default function SearchScreen() {
       
       if (flat) {
         setCurrentFlat(flat);
-        resetChecklist();
+        // resetChecklist();
         setError('');
       } else {
         setError(t('no_flat_found_app'));
@@ -184,8 +185,9 @@ export default function SearchScreen() {
       >
         <View style={styles.headerTop}>
           <View>
+             <LoginIcon width={100} height={50} fill="#ffffff" />
             <Text style={styles.headerTitle}>{t('search_application')}</Text>
-            <Text style={styles.headerSubtitle}>{t('search_subtitle')}</Text>
+            {/* <Text style={styles.headerSubtitle}>{t('search_subtitle')}</Text> */}
           </View>
           <TouchableOpacity
             style={styles.languageButton}
@@ -275,8 +277,9 @@ export default function SearchScreen() {
               onChangeText={handleMobileInputChange}
               autoCapitalize={searchType === 'application' ? 'characters' : 'none'}
               keyboardType={searchType === 'mobile' ? 'phone-pad' : 'default'}
-              editable={searchType !== 'barcode'}
+             // editable={searchType !== 'barcode'}
             />
+   
             {searchType === 'barcode' && (
               <TouchableOpacity
                 style={styles.scanButton}
@@ -322,13 +325,29 @@ export default function SearchScreen() {
                 </View>
               </View>
 
-              <View style={styles.applicantInfo}>
-                <User size={20} color="#2563eb" />
+ <View style={styles.applicantInfo}>
+                {currentFlat.applicantImage ? (
+                  <Image
+                    source={{ uri: currentFlat.applicantImage }}
+                    style={styles.applicantImage}
+                    resizeMode="cover"
+                    accessibilityLabel={t('applicant_image')}
+                  />
+                ) : (
+                  <User size={20} color="#2563eb" />
+                )}
                 <View style={styles.applicantDetails}>
                   <Text style={styles.applicantName}>{currentFlat.applicantName}</Text>
                   <Text style={styles.applicationNumber}>App No: {currentFlat.applicationNo}</Text>
                 </View>
               </View>
+              {/* <View style={styles.applicantInfo}>
+                <User size={20} color="#2563eb" />
+                <View style={styles.applicantDetails}>
+                  <Text style={styles.applicantName}>{currentFlat.applicantName}</Text>
+                  <Text style={styles.applicationNumber}>App No: {currentFlat.applicationNo}</Text>
+                </View>
+              </View> */}
 
               <View style={styles.contactInfo}>
                 <Phone size={16} color="#6b7280" />
@@ -370,7 +389,7 @@ export default function SearchScreen() {
           </View>
         )}
 
-        <View style={styles.helpSection}>
+        {/* <View style={styles.helpSection}>
           <Text style={styles.helpTitle}>{t('search_options')}</Text>
           <Text style={styles.helpText}>
             {t('search_help_text_extended')}
@@ -382,7 +401,7 @@ export default function SearchScreen() {
             <Text style={styles.exampleText}>• Mobile: +91 98765 43210, 9876543210</Text>
             <Text style={styles.exampleText}>• Barcode: {t('scan_application_barcode')}</Text>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
 
       {renderBarcodeScanner()}
@@ -396,8 +415,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   header: {
-    paddingHorizontal: 24,
-    paddingVertical: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   headerTop: {
     flexDirection: 'row',
@@ -405,7 +424,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
     color: '#ffffff',
     marginBottom: 4,
@@ -604,6 +623,14 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 2,
   },
+
+  applicantImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  
   contactInfo: {
     flexDirection: 'row',
     alignItems: 'center',

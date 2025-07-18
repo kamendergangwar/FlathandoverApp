@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, User, Lock } from 'lucide-react-native';
+import LoginIcon from './components/LoginIcon'
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -45,10 +46,11 @@ export default function LoginScreen() {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <LogIn size={48} color="#ffffff" />
+              <LoginIcon width={200} height={100} fill="#ffffff" />
+              {/* <LogIn size={48} color="#ffffff" /> */}
             </View>
             <Text style={styles.title}>Flat Handover</Text>
-            <Text style={styles.subtitle}>Agent Portal</Text>
+            {/* <Text style={styles.subtitle}>Agent Portal</Text> */}
           </View>
 
           <View style={styles.form}>
@@ -91,11 +93,11 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            <View style={styles.demoInfo}>
+            {/* <View style={styles.demoInfo}>
               <Text style={styles.demoText}>Demo Credentials:</Text>
               <Text style={styles.demoText}>Email: agent@helios.com</Text>
               <Text style={styles.demoText}>Password: password123</Text>
-            </View>
+            </View> */}
           </View>
         </View>
       </SafeAreaView>
@@ -120,21 +122,24 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
+    width: 250,
+    height: 100,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 40,
+  
+    borderRadius: 95,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   title: {
+    marginLeft:15,
     fontSize: 32,
     fontFamily: 'Inter-Bold',
     color: '#ffffff',
     marginBottom: 8,
   },
   subtitle: {
+     marginLeft:15,
     fontSize: 18,
     fontFamily: 'Inter-Medium',
     color: 'rgba(255, 255, 255, 0.8)',
