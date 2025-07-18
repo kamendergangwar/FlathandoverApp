@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
-import { ArrowLeft, Plus, CreditCard as Edit3, Trash2, FileText, Upload, Camera, X, Check, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Plus, CreditCard as Edit3, Trash2, FileText, Upload, Camera, X, Check, TriangleAlert as AlertTriangle, ChevronDown, ChevronUp, CircleHelp as HelpCircle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -32,6 +32,7 @@ export default function SnaggingReportScreen() {
   } = useApp();
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [noteText, setNoteText] = useState('');
@@ -39,6 +40,8 @@ export default function SnaggingReportScreen() {
   const [capturedImages, setCapturedImages] = useState<CapturedImage[]>([]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [showDocumentOptions, setShowDocumentOptions] = useState<'snagging' | 'inventory' | null>(null);
 
   const categories = [
     { id: 'electrical', name: t('electrical'), icon: '⚡', color: '#f59e0b' },
@@ -55,6 +58,16 @@ export default function SnaggingReportScreen() {
       </SafeAreaView>
     );
   }
+
+  const toggleCategory = (categoryId: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
 
   const handleAddNote = () => {
     if (!selectedCategory || !noteText.trim()) {
@@ -114,6 +127,42 @@ export default function SnaggingReportScreen() {
     );
   };
 
+  const handleDocumentCapture = async (type: 'snagging' | 'inventory') => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is required to capture documents.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.9,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = {
+          uri: result.assets[0].uri,
+          name: `${type}_report_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+        };
+
+        if (type === 'snagging') {
+          setSignedSnaggingReport(file);
+        } else {
+          setSignedInventoryReport(file);
+        }
+
+        setShowDocumentOptions(null);
+        Alert.alert('Success', t('file_uploaded').replace('{name}', file.name));
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to capture document. Please try again.');
+    }
+  };
+
   const handleDocumentUpload = async (type: 'snagging' | 'inventory') => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -134,6 +183,7 @@ export default function SnaggingReportScreen() {
           setSignedInventoryReport(file);
         }
 
+        setShowDocumentOptions(null);
         Alert.alert('Success', t('file_uploaded').replace('{name}', file.name));
       }
     } catch (error) {
@@ -233,6 +283,89 @@ export default function SnaggingReportScreen() {
     return snaggingNotes.filter(note => note.category === categoryName);
   };
 
+  const renderInstructionsModal = () => (
+    <Modal
+      visible={showInstructionsModal}
+      animationType="fade"
+      transparent
+    >
+      <View style={styles.instructionsModalContainer}>
+        <TouchableOpacity 
+          style={styles.instructionsModalOverlay}
+          onPress={() => setShowInstructionsModal(false)}
+        />
+        <View style={styles.instructionsModalContent}>
+          <View style={styles.instructionsModalHeader}>
+            <View style={styles.instructionsModalTitleContainer}>
+              <AlertTriangle size={24} color="#f59e0b" />
+              <Text style={styles.instructionsModalTitle}>{t('instructions')}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.instructionsModalClose}
+              onPress={() => setShowInstructionsModal(false)}
+            >
+              <X size={20} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.instructionsModalText}>
+            {t('snagging_instructions_text')}
+          </Text>
+          <View style={styles.instructionsSteps}>
+            <Text style={styles.instructionsStepTitle}>Steps to follow:</Text>
+            <Text style={styles.instructionsStep}>1. Inspect each area thoroughly</Text>
+            <Text style={styles.instructionsStep}>2. Document issues with photos</Text>
+            <Text style={styles.instructionsStep}>3. Add detailed notes for each problem</Text>
+            <Text style={styles.instructionsStep}>4. Upload signed reports</Text>
+            <Text style={styles.instructionsStep}>5. Submit the complete report</Text>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const renderDocumentOptionsModal = () => (
+    <Modal
+      visible={showDocumentOptions !== null}
+      animationType="slide"
+      transparent
+    >
+      <View style={styles.documentOptionsContainer}>
+        <TouchableOpacity 
+          style={styles.documentOptionsOverlay}
+          onPress={() => setShowDocumentOptions(null)}
+        />
+        <View style={styles.documentOptionsContent}>
+          <View style={styles.documentOptionsHeader}>
+            <Text style={styles.documentOptionsTitle}>
+              {showDocumentOptions === 'snagging' ? 'Snagging Report' : 'Inventory Report'}
+            </Text>
+            <TouchableOpacity onPress={() => setShowDocumentOptions(null)}>
+              <X size={24} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.documentOptionsButtons}>
+            <TouchableOpacity
+              style={styles.documentOptionButton}
+              onPress={() => showDocumentOptions && handleDocumentCapture(showDocumentOptions)}
+            >
+              <Camera size={24} color="#2563eb" />
+              <Text style={styles.documentOptionText}>Capture with Camera</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.documentOptionButton}
+              onPress={() => showDocumentOptions && handleDocumentUpload(showDocumentOptions)}
+            >
+              <Upload size={24} color="#2563eb" />
+              <Text style={styles.documentOptionText}>Upload from Gallery</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const renderAddNoteModal = () => (
     <Modal
       visible={showAddModal}
@@ -268,8 +401,10 @@ export default function SnaggingReportScreen() {
                 key={category.id}
                 style={[
                   styles.categoryCard,
-                  selectedCategory === category.id && styles.categoryCardSelected,
-                  { borderColor: category.color }
+                  selectedCategory === category.id && { 
+                    backgroundColor: category.color,
+                    borderColor: category.color 
+                  }
                 ]}
                 onPress={() => setSelectedCategory(category.id)}
               >
@@ -354,25 +489,27 @@ export default function SnaggingReportScreen() {
                 {t('total_notes').replace('{count}', snaggingNotes.length.toString())}
               </Text>
             </View>
+            <TouchableOpacity
+              style={styles.helpButton}
+              onPress={() => setShowInstructionsModal(true)}
+            >
+              <HelpCircle size={20} color="#6b7280" />
+            </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={styles.instructionsCard}>
-          <View style={styles.instructionsHeader}>
-            <AlertTriangle size={20} color="#f59e0b" />
-            <Text style={styles.instructionsTitle}>{t('instructions')}</Text>
-          </View>
-          <Text style={styles.instructionsText}>
-            {t('snagging_instructions_text')}
-          </Text>
         </View>
 
         <View style={styles.categoriesSection}>
+          <Text style={styles.sectionTitle}>Inspection Categories</Text>
           {categories.map((category) => {
             const categoryNotes = getCategoryNotes(category.name);
+            const isExpanded = expandedCategories.has(category.id);
+            
             return (
               <View key={category.id} style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
+                <TouchableOpacity
+                  style={styles.categoryHeader}
+                  onPress={() => toggleCategory(category.id)}
+                >
                   <View style={styles.categoryTitleContainer}>
                     <Text style={styles.categoryIcon}>{category.icon}</Text>
                     <Text style={styles.categoryTitle}>{category.name}</Text>
@@ -380,32 +517,47 @@ export default function SnaggingReportScreen() {
                       <Text style={styles.categoryBadgeText}>{categoryNotes.length}</Text>
                     </View>
                   </View>
-                </View>
+                  {isExpanded ? (
+                    <ChevronUp size={20} color="#6b7280" />
+                  ) : (
+                    <ChevronDown size={20} color="#6b7280" />
+                  )}
+                </TouchableOpacity>
 
-                {categoryNotes.map((note) => (
-                  <View key={note.id} style={styles.noteCard}>
-                    <View style={styles.noteContent}>
-                      <Text style={styles.noteText}>{note.note}</Text>
-                      <Text style={styles.noteTimestamp}>
-                        {new Date(note.timestamp).toLocaleString()}
-                      </Text>
-                    </View>
-                    <View style={styles.noteActions}>
-                      <TouchableOpacity
-                        style={styles.noteActionButton}
-                        onPress={() => handleEditNote(note.id)}
-                      >
-                        <Edit3 size={16} color="#6b7280" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.noteActionButton}
-                        onPress={() => handleDeleteNote(note.id)}
-                      >
-                        <Trash2 size={16} color="#ef4444" />
-                      </TouchableOpacity>
-                    </View>
+                {isExpanded && (
+                  <View style={styles.categoryNotesContainer}>
+                    {categoryNotes.length === 0 ? (
+                      <View style={styles.emptyNotesContainer}>
+                        <Text style={styles.emptyNotesText}>No issues found in this category</Text>
+                      </View>
+                    ) : (
+                      categoryNotes.map((note) => (
+                        <View key={note.id} style={styles.noteCard}>
+                          <View style={styles.noteContent}>
+                            <Text style={styles.noteText}>{note.note}</Text>
+                            <Text style={styles.noteTimestamp}>
+                              {new Date(note.timestamp).toLocaleString()}
+                            </Text>
+                          </View>
+                          <View style={styles.noteActions}>
+                            <TouchableOpacity
+                              style={styles.noteActionButton}
+                              onPress={() => handleEditNote(note.id)}
+                            >
+                              <Edit3 size={16} color="#6b7280" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.noteActionButton}
+                              onPress={() => handleDeleteNote(note.id)}
+                            >
+                              <Trash2 size={16} color="#ef4444" />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      ))
+                    )}
                   </View>
-                ))}
+                )}
               </View>
             );
           })}
@@ -461,14 +613,20 @@ export default function SnaggingReportScreen() {
               <View style={styles.uploadedFile}>
                 <Check size={16} color="#059669" />
                 <Text style={styles.uploadedFileName}>{signedSnaggingReport.name}</Text>
+                <TouchableOpacity
+                  style={styles.replaceButton}
+                  onPress={() => setShowDocumentOptions('snagging')}
+                >
+                  <Text style={styles.replaceButtonText}>Replace</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity
                 style={styles.uploadButton}
-                onPress={() => handleDocumentUpload('snagging')}
+                onPress={() => setShowDocumentOptions('snagging')}
               >
                 <Upload size={16} color="#2563eb" />
-                <Text style={styles.uploadButtonText}>Upload Document</Text>
+                <Text style={styles.uploadButtonText}>Add Document</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -482,14 +640,20 @@ export default function SnaggingReportScreen() {
               <View style={styles.uploadedFile}>
                 <Check size={16} color="#059669" />
                 <Text style={styles.uploadedFileName}>{signedInventoryReport.name}</Text>
+                <TouchableOpacity
+                  style={styles.replaceButton}
+                  onPress={() => setShowDocumentOptions('inventory')}
+                >
+                  <Text style={styles.replaceButtonText}>Replace</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity
                 style={styles.uploadButton}
-                onPress={() => handleDocumentUpload('inventory')}
+                onPress={() => setShowDocumentOptions('inventory')}
               >
                 <Upload size={16} color="#2563eb" />
-                <Text style={styles.uploadButtonText}>Upload Document</Text>
+                <Text style={styles.uploadButtonText}>Add Document</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -519,6 +683,8 @@ export default function SnaggingReportScreen() {
         </View>
       </ScrollView>
 
+      {renderInstructionsModal()}
+      {renderDocumentOptionsModal()}
       {renderAddNoteModal()}
       {renderImageModal()}
     </SafeAreaView>
@@ -588,42 +754,35 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginTop: 2,
   },
-  instructionsCard: {
-    backgroundColor: '#fef3c7',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#fde68a',
-  },
-  instructionsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  instructionsTitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#d97706',
-    marginLeft: 8,
-  },
-  instructionsText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#92400e',
-    lineHeight: 20,
+  helpButton: {
+    padding: 8,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 20,
   },
   categoriesSection: {
     marginBottom: 24,
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 16,
+  },
   categorySection: {
-    marginBottom: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    padding: 16,
   },
   categoryTitleContainer: {
     flexDirection: 'row',
@@ -632,7 +791,7 @@ const styles = StyleSheet.create({
   },
   categoryIcon: {
     fontSize: 20,
-    marginRight: 8,
+    marginRight: 12,
   },
   categoryTitle: {
     fontSize: 16,
@@ -646,24 +805,36 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     minWidth: 24,
     alignItems: 'center',
+    marginRight: 8,
   },
   categoryBadgeText: {
     fontSize: 12,
     fontFamily: 'Inter-Bold',
     color: '#ffffff',
   },
-  noteCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+  categoryNotesContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  emptyNotesContainer: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
     padding: 16,
+    alignItems: 'center',
+  },
+  emptyNotesText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#9ca3af',
+    fontStyle: 'italic',
+  },
+  noteCard: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    padding: 12,
     marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   noteContent: {
     flex: 1,
@@ -685,17 +856,11 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   noteActionButton: {
-    padding: 8,
+    padding: 6,
     marginLeft: 4,
   },
   mediaSection: {
     marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
-    color: '#111827',
-    marginBottom: 16,
   },
   mediaActions: {
     flexDirection: 'row',
@@ -808,6 +973,17 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
   },
+  replaceButton: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  replaceButtonText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#6b7280',
+  },
   actionContainer: {
     paddingBottom: 24,
   },
@@ -840,6 +1016,117 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
     color: '#ffffff',
+  },
+  // Instructions Modal Styles
+  instructionsModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  instructionsModalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  instructionsModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxHeight: '80%',
+  },
+  instructionsModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  instructionsModalTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  instructionsModalTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginLeft: 8,
+  },
+  instructionsModalClose: {
+    padding: 4,
+  },
+  instructionsModalText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6b7280',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  instructionsSteps: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    padding: 16,
+  },
+  instructionsStepTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  instructionsStep: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  // Document Options Modal Styles
+  documentOptionsContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  documentOptionsOverlay: {
+    flex: 1,
+  },
+  documentOptionsContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  documentOptionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  documentOptionsTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: '#111827',
+  },
+  documentOptionsButtons: {
+    gap: 12,
+  },
+  documentOptionButton: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  documentOptionText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#111827',
+    marginLeft: 12,
   },
   // Modal Styles
   modalContainer: {
@@ -874,6 +1161,7 @@ const styles = StyleSheet.create({
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginBottom: 24,
   },
   categoryCard: {
@@ -882,14 +1170,9 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     width: '48%',
-    marginRight: '2%',
     marginBottom: 12,
     borderWidth: 2,
     borderColor: '#e5e7eb',
-  },
-  categoryCardSelected: {
-    backgroundColor: '#eff6ff',
-    borderWidth: 2,
   },
   categoryName: {
     fontSize: 12,
@@ -899,7 +1182,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   categoryNameSelected: {
-    color: '#2563eb',
+    color: '#ffffff',
   },
   noteInput: {
     backgroundColor: '#f9fafb',
