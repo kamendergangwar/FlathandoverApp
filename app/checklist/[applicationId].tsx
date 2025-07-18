@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useApp } from '@/contexts/AppContext';
-import { ArrowLeft, Plus, Edit3, Trash2, FileText, Upload, Camera, X, Check, AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Plus, CreditCard as Edit3, Trash2, FileText, Upload, Camera, X, Check, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 
