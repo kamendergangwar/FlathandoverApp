@@ -212,7 +212,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogIn, Smartphone, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
+import { LogIn, Smartphone, Lock, Eye, EyeOff, CircleAlert as AlertCircle } from 'lucide-react-native';
 import LoginIcon from './components/LoginIcon'
 
 const { width } = Dimensions.get('window');
@@ -436,22 +436,18 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     paddingLeft: 12,
   },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fef2f2',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: '#fecaca',
-  },
   errorText: {
     color: '#ef4444',
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Inter-Medium',
-    marginLeft: 8,
-    flex: 1,
+    marginBottom: 18,
+    textAlign: 'center',
+    backgroundColor: '#fef2f2',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fecaca',
   },
   loginButton: {
     backgroundColor: '#2563eb',
