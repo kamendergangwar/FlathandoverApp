@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, logout as logoutAction, clearError } from '@/store/slices/authSlice';
+import { createContext, useContext, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { loginUser, logout as logoutAction, clearError } from '@/store/slices/authSlice';
 
 interface User {
   id: string;
@@ -8,13 +11,17 @@ interface User {
   agentId: string;
   email: string;
   mobile: string;
+  mobile: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (mobile: string, password: string) => Promise<boolean>;
+  login: (mobile: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  error: string | null;
+  clearError: () => void;
   error: string | null;
   clearError: () => void;
 }
@@ -39,8 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check for existing session on app start
     // In a real app, you might check AsyncStorage or secure storage here
+    // Check for existing session on app start
+    // In a real app, you might check AsyncStorage or secure storage here
   }, []);
 
+  const login = async (mobile: string, password: string): Promise<boolean> => {
+    try {
+      const result = await dispatch(loginUser({ username: mobile, password }));
+      return loginUser.fulfilled.match(result);
+    } catch (error) {
+      return false;
+    }
   const login = async (mobile: string, password: string): Promise<boolean> => {
     try {
       const result = await dispatch(loginUser({ username: mobile, password }));
@@ -56,9 +72,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleClearError = () => {
     dispatch(clearError());
+    dispatch(logoutAction());
+  };
+
+  const handleClearError = () => {
+    dispatch(clearError());
   };
 
   return (
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isLoading, 
+      error, 
+      clearError: handleClearError 
+    }}>
     <AuthContext.Provider value={{ 
       user, 
       login, 
