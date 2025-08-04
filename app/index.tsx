@@ -214,6 +214,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, Smartphone, Lock, Eye, EyeOff, CircleAlert as AlertCircle } from 'lucide-react-native';
 import LoginIcon from './components/LoginIcon'
+import { apiConfig } from '@/services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -345,6 +346,11 @@ export default function LoginScreen() {
           
           <View style={styles.footer}>
             <Text style={styles.footerText}>Powered by CIDCO Homes</Text>
+            {__DEV__ && (
+              <Text style={styles.debugText}>
+                API: {apiConfig.environment} ({apiConfig.baseURL})
+              </Text>
+            )}
           </View>
         </View>
       </SafeAreaView>
@@ -500,5 +506,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: 'rgba(255, 255, 255, 0.6)',
+  },
+  debugText: {
+    fontSize: 10,
+    fontFamily: 'Inter-Regular',
+    color: 'rgba(255, 255, 255, 0.4)',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });

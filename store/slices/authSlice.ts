@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { authAPI } from '@/services/api';
 
 interface User {
   id: string;
@@ -42,9 +42,7 @@ export const loginUser = createAsyncThunk<
   'auth/loginUser',
   async ({ username, password }, { rejectWithValue }) => {
     try {
-      const response = await axios.post<LoginResponse>(
-        `http://localhost/rest-api/applicationservice/Snagging/login?username=${username}&password=${password}`
-      );
+      const response = await authAPI.login(username, password);
 
       if (response.data.success && response.data.status) {
         // If login is successful, return user data
@@ -61,10 +59,22 @@ export const loginUser = createAsyncThunk<
         return rejectWithValue(response.data.message || 'Login failed');
       }
     } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // Handle different types of errors
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue('Request timeout. Please check your connection and try again.');
+      }
+      
+      if (error.code === 'NETWORK_ERROR' || !error.response) {
+        return rejectWithValue('Network error. Please check your internet connection.');
+      }
+      
       if (error.response?.data?.message) {
         return rejectWithValue(error.response.data.message);
       }
-      return rejectWithValue('Network error. Please check your connection.');
+      
+      return rejectWithValue('Login failed. Please try again.');
     }
   }
 );
