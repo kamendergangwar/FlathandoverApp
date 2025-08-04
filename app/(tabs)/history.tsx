@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar, CircleCheck as CheckCircle, Circle as XCircle, Clock, Chrome as Home, User } from 'lucide-react-native';
@@ -76,7 +76,8 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+  <SafeAreaView style={styles.container} edges={['left', 'right']}>
+          <StatusBar backgroundColor="#1e40af" barStyle="light-content" />
       <LinearGradient
         colors={['#1e40af', '#2563eb']}
         style={styles.header}
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingVertical: 24,
+     paddingTop: StatusBar.currentHeight || 0,
   },
   headerTitle: {
     fontSize: 24,

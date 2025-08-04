@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal,Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal,Image, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '@/contexts/AppContext';
@@ -178,7 +178,8 @@ export default function SearchScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+   <SafeAreaView style={styles.container} edges={['left', 'right']}>
+           <StatusBar backgroundColor="#1e40af" barStyle="light-content" />
       <LinearGradient
         colors={['#1e40af', '#2563eb']}
         style={styles.header}
@@ -417,6 +418,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+      paddingTop: StatusBar.currentHeight || 0,
   },
   headerTop: {
     flexDirection: 'row',
