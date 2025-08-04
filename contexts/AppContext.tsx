@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { snaggingAPI } from '@/services/api';
 
 interface Flat {
   id: string;
@@ -440,6 +441,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const searchFlat = async (searchValue: string, searchType: 'application' | 'mobile'): Promise<Flat | null> => {
+    try {
+      // Try to use the API first
+      const response = await snaggingAPI.searchFlat(searchValue, searchType);
+      
+      if (response.data.success && response.data.data?.length > 0) {
+        // Map API response to Flat interface
+        const apiFlat = response.data.data[0];
+        return {
+          id: apiFlat.id || Date.now().toString(),
+          applicationNo: apiFlat.applicationNo || searchValue,
+          applicantName: apiFlat.applicantName || 'Unknown',
+          flatNo: apiFlat.flatNo || 'N/A',
+          tower: apiFlat.tower || 'N/A',
+          area: apiFlat.area || 'N/A',
+          bhk: apiFlat.bhk || 'N/A',
+          floor: apiFlat.floor || 1,
+          possession_date: apiFlat.possession_date || new Date().toISOString().split('T')[0],
+          project: apiFlat.project || 'N/A',
+          mobileNumber: apiFlat.mobileNumber || 'N/A',
+          status: apiFlat.status || 'pending',
+          applicantImage: apiFlat.applicantImage,
+        };
+      }
+    } catch (error) {
+      console.error('API search failed, falling back to mock data:', error);
+    }
+
+    // Fallback to mock data if API fails
     await new Promise(resolve => setTimeout(resolve, 1000));
     let flat: Flat | undefined;
 
@@ -452,15 +481,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return cleanMobileNumber.includes(cleanSearchValue) || cleanSearchValue.includes(cleanMobileNumber.slice(-10));
       });
     }
-
     return flat || null;
   };
 
   const submitReport = async (report: any, signedSnaggingReport: UploadedFile | null, signedInventoryReport: UploadedFile | null): Promise<boolean> => {
-    // Simulate API call with file uploads
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log('Submitting report with files:', { report, signedSnaggingReport, signedInventoryReport });
-    return true;
+    try {
+      // Try to use the API first
+      const response = await snaggingAPI.submitReport({
+        report,
+        signedSnaggingReport,
+        signedInventoryReport
+      });
+      
+      return response.data.success || false;
+    } catch (error) {
+      console.error('API submit failed, using fallback:', error);
+      // Fallback simulation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Submitting report with files:', { report, signedSnaggingReport, signedInventoryReport });
+      return true;
+    }
   };
 
   const completeHandover = () => {

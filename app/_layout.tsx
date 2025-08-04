@@ -6,6 +6,8 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AppProvider } from '@/contexts/AppContext';
+import { Provider } from 'react-redux';
+import { store } from '@/store/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,19 +32,21 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <AppProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="checklist/[applicationId]" />
-          <Stack.Screen name="signature/[applicationId]" />
-          <Stack.Screen name="otp/[applicationId]" />
-          <Stack.Screen name="complaint/[applicationId]" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </AppProvider>
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <AppProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="checklist/[applicationId]" />
+            <Stack.Screen name="signature/[applicationId]" />
+            <Stack.Screen name="otp/[applicationId]" />
+            <Stack.Screen name="complaint/[applicationId]" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </AppProvider>
+      </AuthProvider>
+    </Provider>
   );
 }

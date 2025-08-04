@@ -55,6 +55,7 @@ export default function ProfileScreen() {
             <Text style={styles.profileName}>{user?.name}</Text>
             <Text style={styles.profileRole}>Field Agent</Text>
             <Text style={styles.agentId}>ID: {user?.agentId}</Text>
+            <Text style={styles.agentMobile}>Mobile: {user?.mobile}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -65,11 +66,11 @@ export default function ProfileScreen() {
           <View style={styles.contactCard}>
             <View style={styles.contactRow}>
               <Mail size={20} color="#2563eb" />
-              <Text style={styles.contactText}>{user?.email}</Text>
+              <Text style={styles.contactText}>{user?.email || 'Not provided'}</Text>
             </View>
             <View style={styles.contactRow}>
               <Phone size={20} color="#2563eb" />
-              <Text style={styles.contactText}>+91 98765 43210</Text>
+              <Text style={styles.contactText}>+91 {user?.mobile}</Text>
             </View>
             <View style={styles.contactRow}>
               <MapPin size={20} color="#2563eb" />
@@ -188,6 +189,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     color: 'rgba(255, 255, 255, 0.7)',
     marginTop: 4,
+  },
+  agentMobile: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginTop: 2,
   },
   content: {
     flex: 1,

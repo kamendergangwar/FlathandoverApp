@@ -1,60 +1,72 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { loginUser, logout as logoutAction, clearError } from '@/store/slices/authSlice';
 
 interface User {
   id: string;
-  name: string;
+  name: string; // Ensure 'name' exists on User
   agentId: string;
   email: string;
+  mobile: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (mobile: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  error: string | null;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { user: reduxUser, isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Map reduxUser to match the local User interface if necessary
+  const user: User | null = reduxUser
+    ? {
+        id: reduxUser.id,
+        name: reduxUser.username,
+        agentId: reduxUser.id,
+        email: reduxUser.emailId,
+        mobile: reduxUser.mobile,
+      }
+    : null;
 
   useEffect(() => {
-    // Simulate checking for existing session
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    // Check for existing session on app start
+    // In a real app, you might check AsyncStorage or secure storage here
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Mock validation - in real app, this would be API call
-    if (email === 'agent@helios.com' && password === 'password123') {
-      setUser({
-        id: '1',
-        name: 'Kamender Gangwar',
-        agentId: 'AG001',
-        email: 'agent@helios.com'
-      });
-      setIsLoading(false);
-      return true;
+  const login = async (mobile: string, password: string): Promise<boolean> => {
+    try {
+      const result = await dispatch(loginUser({ username: mobile, password }));
+      return loginUser.fulfilled.match(result);
+    } catch (error) {
+      return false;
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
   const logout = () => {
-    setUser(null);
+    dispatch(logoutAction());
+  };
+
+  const handleClearError = () => {
+    dispatch(clearError());
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isLoading, 
+      error, 
+      clearError: handleClearError 
+    }}>
       {children}
     </AuthContext.Provider>
   );
