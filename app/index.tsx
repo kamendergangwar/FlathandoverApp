@@ -207,22 +207,21 @@
 // });
 
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogIn, User, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { LogIn, Smartphone, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
 import LoginIcon from './components/LoginIcon'
 
 const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading, user } = useAuth();
+  const { login, isLoading, user, error, clearError } = useAuth();
   const router = useRouter();
 
   // If user is already authenticated, redirect to tabs
@@ -233,22 +232,31 @@ export default function LoginScreen() {
   }, [user, router]);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please enter both email and password');
+    if (!mobile || !password) {
+      Alert.alert('Missing Information', 'Please enter both mobile number and password');
       return;
     }
 
-    setError('');
-    const success = await login(email, password);
+    // Clear any previous errors
+    clearError();
+    
+    const success = await login(mobile, password);
     
     if (success) {
       router.replace('/(tabs)');
-    } else {
-      setError('Invalid email or password');
     }
   };
 
+  const handleMobileChange = (text: string) => {
+    // Remove any non-numeric characters
+    const numericText = text.replace(/[^0-9]/g, '');
+    setMobile(numericText);
+  };
   return (
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
     <LinearGradient
      colors={['#1e40af', '#2563eb', '#3b82f6']}
       style={styles.container}
@@ -266,20 +274,21 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.form}>
-            {/* <Text style={styles.formTitle}>Agent Login</Text> */}
+            <Text style={styles.formTitle}>Agent Login</Text>
             
             <View style={styles.inputContainer}>
               <View style={styles.inputIconContainer}>
-                <User size={20} color="#6b7280" />
+                <Smartphone size={20} color="#6b7280" />
               </View>
               <TextInput
                 style={styles.input}
-                placeholder="Email Address"
+                placeholder="Mobile Number"
                 placeholderTextColor="#9ca3af"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
+                value={mobile}
+                onChangeText={handleMobileChange}
+                keyboardType="phone-pad"
                 autoCapitalize="none"
+                maxLength={10}
               />
             </View>
 
@@ -301,10 +310,14 @@ export default function LoginScreen() {
               >
                 {showPassword ? <EyeOff size={20} color="#6b7280" /> : <Eye size={20} color="#6b7280" />}
               </TouchableOpacity>
-              
             </View>
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error && (
+              <View style={styles.errorContainer}>
+                <AlertCircle size={16} color="#dc2626" />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
 
             <TouchableOpacity 
               style={styles.loginButton} 
@@ -321,13 +334,13 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            {/* <View style={styles.demoInfo}>
+            <View style={styles.demoInfo}>
               <Text style={styles.demoText}>Demo Credentials:</Text>
               <View style={styles.demoCredentials}>
-                <Text style={styles.demoCredential}>📧 agent@helios.com</Text>
-                <Text style={styles.demoCredential}>🔑 password123</Text>
+                <Text style={styles.demoCredential}>📱 8668742625</Text>
+                <Text style={styles.demoCredential}>🔑 helios@123</Text>
               </View>
-            </View> */}
+            </View>
           </View>
           
           <View style={styles.footer}>
@@ -336,6 +349,7 @@ export default function LoginScreen() {
         </View>
       </SafeAreaView>
     </LinearGradient>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -422,18 +436,22 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     paddingLeft: 12,
   },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 13,
-    fontFamily: 'Inter-Medium',
-    marginBottom: 18,
-    textAlign: 'center',
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fef2f2',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
     borderRadius: 8,
+    padding: 12,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: '#fecaca',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    marginLeft: 8,
+    flex: 1,
   },
   loginButton: {
     backgroundColor: '#2563eb',
