@@ -7,6 +7,7 @@ interface User {
   mobile: string;
   emailId: string;
   status: string;
+  isActive: boolean;
 }
 
 interface AuthState {
@@ -54,6 +55,11 @@ export const loginUser = createAsyncThunk<
 
       // Check if success is true and data exists
       if (loginResponse.success && loginResponse.data) {
+        // Check if agent is active (status "1" means active, "0" means inactive)
+        if (loginResponse.data.status !== "1") {
+          return rejectWithValue('Your account is inactive. Please contact administrator.');
+        }
+        
         console.log('Login successful:', loginResponse);
         
         // Map the API response to our User interface
@@ -62,7 +68,8 @@ export const loginUser = createAsyncThunk<
           username: loginResponse.data.username,
           mobile: loginResponse.data.mobile,
           emailId: loginResponse.data.emailId,
-          status: loginResponse.data.status
+          status: loginResponse.data.status,
+          isActive: loginResponse.data.status === "1"
         };
         return user;
       } else {

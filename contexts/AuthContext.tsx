@@ -4,22 +4,20 @@ import { loginUser, logout as logoutAction, clearError } from '@/store/slices/au
 
 interface User {
   id: string;
-  name: string; // Ensure 'name' exists on User
+  name: string;
   agentId: string;
   email: string;
   mobile: string;
-  
+  isActive: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (mobile: string, password: string) => Promise<boolean>;
-
   logout: () => void;
   isLoading: boolean;
   error: string | null;
   clearError: () => void;
-
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         agentId: reduxUser.id,
         email: reduxUser.emailId,
         mobile: reduxUser.mobile,
+        isActive: reduxUser.isActive,
       }
     : null;
 
