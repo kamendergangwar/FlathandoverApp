@@ -67,7 +67,7 @@ export default api;
 // API endpoints
 export const authAPI = {
   login: (username: string, password: string) =>
-    api.post('Snagging/login', { username, password }), // Send as request body instead of query params
+    api.post('Snagging/login', { username, password }),
 };
 
 
