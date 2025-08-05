@@ -54,6 +54,9 @@ export default function ProfileScreen() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{user?.name}</Text>
             <Text style={styles.profileRole}>Field Agent</Text>
+            <View style={[styles.statusBadge, { backgroundColor: user?.isActive ? '#059669' : '#dc2626' }]}>
+              <Text style={styles.statusText}>{user?.isActive ? 'Active' : 'Inactive'}</Text>
+            </View>
             <Text style={styles.agentId}>ID: {user?.agentId}</Text>
             <Text style={styles.agentMobile}>Mobile: {user?.mobile}</Text>
           </View>
@@ -195,6 +198,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: 2,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  statusText: {
+    fontSize: 10,
+    fontFamily: 'Inter-SemiBold',
+    color: '#ffffff',
   },
   content: {
     flex: 1,

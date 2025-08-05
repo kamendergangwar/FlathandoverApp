@@ -39,7 +39,12 @@ export default function Dashboard() {
           <View style={styles.headerLeft}>
             <LoginIcon width={100} height={50} fill="#ffffff" />
             {user?.name && (
-              <Text style={styles.agentName}>{user.name}</Text>
+              <View style={styles.userInfo}>
+                <Text style={styles.agentName}>{user.name}</Text>
+                <View style={[styles.statusIndicator, { backgroundColor: user.isActive ? '#059669' : '#dc2626' }]}>
+                  <Text style={styles.statusIndicatorText}>{user.isActive ? 'Active' : 'Inactive'}</Text>
+                </View>
+              </View>
             )}
             {/* Uncomment if you want to include greeting */}
             {/* <Text style={styles.greeting}>{t('welcome_back')}</Text> */}
@@ -203,6 +208,22 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flexDirection: 'column',
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statusIndicator: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  statusIndicatorText: {
+    fontSize: 8,
+    fontFamily: 'Inter-SemiBold',
+    color: '#ffffff',
   },
   languageButton: {
     flexDirection: 'row',

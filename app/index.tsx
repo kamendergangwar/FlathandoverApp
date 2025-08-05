@@ -244,6 +244,12 @@ export default function LoginScreen() {
     const success = await login(mobile, password);
     
     if (success) {
+      // Check if user is active before proceeding
+      if (user && !user.isActive) {
+        Alert.alert('Account Inactive', 'Your account is inactive. Please contact administrator.');
+        logout();
+        return;
+      }
       router.replace('/(tabs)');
     }
   };
