@@ -215,6 +215,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, Smartphone, Lock, Eye, EyeOff, CircleAlert as AlertCircle } from 'lucide-react-native';
 import LoginIcon from './components/LoginIcon'
 import { apiConfig } from '@/services/api';
+import { logout } from '@/store/slices/authSlice';
 
 const { width } = Dimensions.get('window');
 
@@ -260,10 +261,7 @@ export default function LoginScreen() {
     setMobile(numericText);
   };
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+  
     <LinearGradient
      colors={['#1e40af', '#2563eb', '#3b82f6']}
       style={styles.container}
@@ -341,13 +339,7 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            <View style={styles.demoInfo}>
-              <Text style={styles.demoText}>Demo Credentials:</Text>
-              <View style={styles.demoCredentials}>
-                <Text style={styles.demoCredential}>📱 8668742625</Text>
-                <Text style={styles.demoCredential}>🔑 helios@123</Text>
-              </View>
-            </View>
+           
           </View>
           
           <View style={styles.footer}>
@@ -361,7 +353,7 @@ export default function LoginScreen() {
         </View>
       </SafeAreaView>
     </LinearGradient>
-    </KeyboardAvoidingView>
+    
   );
 }
 

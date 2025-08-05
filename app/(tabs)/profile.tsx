@@ -53,10 +53,13 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{user?.name}</Text>
-            <Text style={styles.profileRole}>Field Agent</Text>
-            <View style={[styles.statusBadge, { backgroundColor: user?.isActive ? '#059669' : '#dc2626' }]}>
-              <Text style={styles.statusText}>{user?.isActive ? 'Active' : 'Inactive'}</Text>
-            </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <Text style={styles.profileRole}>Field Agent</Text>
+  <View style={[styles.statusBadge, { backgroundColor: user?.isActive ? '#059669' : '#dc2626', marginLeft: 8 }]}>
+    <Text style={styles.statusText}>{user?.isActive ? 'Active' : 'Inactive'}</Text>
+  </View>
+</View>
+            
             <Text style={styles.agentId}>ID: {user?.agentId}</Text>
             <Text style={styles.agentMobile}>Mobile: {user?.mobile}</Text>
           </View>
