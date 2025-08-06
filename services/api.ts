@@ -75,8 +75,14 @@ export const snaggingAPI = {
   // Add other snagging-related API calls here
   getApplications: () => api.get('/applications'),
   submitReport: (data: any) => api.post('/submit-report', data),
-  searchFlat: (searchValue: string, searchType: string) => 
-    api.get(`/search?value=${searchValue}&type=${searchType}`),
+  searchFlat: (searchValue: string, searchType: string) => {
+    const payload = {
+      applicantId: "",
+      applicationNo: searchType === 'application' ? searchValue : "",
+      MobileNo: searchType === 'mobile' ? searchValue : ""
+    };
+    return api.post('Snagging/search', payload);
+  },
 };
 
 // Export configuration for debugging

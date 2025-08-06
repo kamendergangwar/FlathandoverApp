@@ -445,23 +445,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Try to use the API first
       const response = await snaggingAPI.searchFlat(searchValue, searchType);
       
-      if (response.data.success && response.data.data?.length > 0) {
+      if (response.data.success && response.data.data) {
         // Map API response to Flat interface
-        const apiFlat = response.data.data[0];
+        const apiFlat = response.data.data;
         return {
-          id: apiFlat.id || Date.now().toString(),
+          id: Date.now().toString(),
           applicationNo: apiFlat.applicationNo || searchValue,
-          applicantName: apiFlat.applicantName || 'Unknown',
-          flatNo: apiFlat.flatNo || 'N/A',
-          tower: apiFlat.tower || 'N/A',
-          area: apiFlat.area || 'N/A',
-          bhk: apiFlat.bhk || 'N/A',
-          floor: apiFlat.floor || 1,
+          applicantName: apiFlat.FirstName || 'Unknown',
+          flatNo: apiFlat.FlatNo || 'N/A',
+          tower: apiFlat.Wing || 'N/A',
+          area: 'N/A', // Not provided in API response
+          bhk: apiFlat.AptType || 'N/A',
+          floor: parseInt(apiFlat.FloorNo) || 1,
           possession_date: apiFlat.possession_date || new Date().toISOString().split('T')[0],
-          project: apiFlat.project || 'N/A',
-          mobileNumber: apiFlat.mobileNumber || 'N/A',
+          project: apiFlat.ProjectName || 'N/A',
+          mobileNumber: apiFlat.MobileNo || 'N/A',
           status: apiFlat.status || 'pending',
-          applicantImage: apiFlat.applicantImage,
+          applicantImage: apiFlat.ImagePath,
         };
       }
     } catch (error) {
