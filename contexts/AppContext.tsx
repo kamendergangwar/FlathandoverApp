@@ -443,7 +443,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const searchFlat = async (searchValue: string, searchType: 'application' | 'mobile'): Promise<Flat | null> => {
     try {
       // Try to use the API first
-      const response = await snaggingAPI.searchFlat(searchValue, searchType);
+      // For mobile search, remove +91 prefix before sending to API
+      let apiSearchValue = searchValue;
+      if (searchType === 'mobile') {
+        apiSearchValue = searchValue.replace(/^\+91\s*/, '').replace(/\s/g, '');
+      }
+      
+      const response = await snaggingAPI.searchFlat(apiSearchValue, searchType);
       
       if (response.data.success && response.data.data) {
         // Map API response to Flat interface
