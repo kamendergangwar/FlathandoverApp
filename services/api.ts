@@ -1,14 +1,15 @@
 import axios from 'axios';
 
 // Get environment variables
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice/';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice';
 const API_TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '10000');
 const ENV = process.env.EXPO_PUBLIC_ENV || 'development';
 
 console.log('API Configuration:', {
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
-  environment: ENV
+  environment: ENV,
+  timestamp: new Date().toISOString()
 });
 
 // Create axios instance with base configuration
