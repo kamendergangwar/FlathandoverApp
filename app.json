@@ -33,7 +33,10 @@
       "router": {},
       "eas": {
         "projectId": "b6bc927b-9824-4a4e-ae21-902278618830"
-      }
+      },
+      "apiBaseUrl": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
+      "apiTimeout": 12000,
+      "environment": "development"
     },
     "android": {
       "package": "com.helios_advisory.snaggingapp"

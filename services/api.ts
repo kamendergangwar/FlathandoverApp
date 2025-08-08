@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { environmentConfig } from '@/config/environment';
 
-// Get environment variables
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice';
-const API_TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '10000');
-const ENV = process.env.EXPO_PUBLIC_ENV || 'development';
+// Use environment configuration
+const API_BASE_URL = environmentConfig.apiBaseUrl;
+const API_TIMEOUT = environmentConfig.apiTimeout;
+const ENV = environmentConfig.environment;
 
 console.log('API Configuration:', {
   baseURL: API_BASE_URL,
