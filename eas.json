@@ -11,11 +11,6 @@
         "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice/",
         "EXPO_PUBLIC_API_TIMEOUT": "12000",
         "EXPO_PUBLIC_ENV": "development"
-      },
-      "extra": {
-        "apiBaseUrl": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
-        "apiTimeout": 12000,
-        "environment": "development"
       }
     },
     "staging": {
@@ -25,11 +20,6 @@
         "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
         "EXPO_PUBLIC_API_TIMEOUT": "12000",
         "EXPO_PUBLIC_ENV": "staging"
-      },
-      "extra": {
-        "apiBaseUrl": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
-        "apiTimeout": 12000,
-        "environment": "staging"
       }
     },
     "preview": {
@@ -38,11 +28,6 @@
         "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice/",
         "EXPO_PUBLIC_API_TIMEOUT": "12000",
         "EXPO_PUBLIC_ENV": "preview"
-      },
-      "extra": {
-        "apiBaseUrl": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
-        "apiTimeout": 12000,
-        "environment": "preview"
       }
     },
     "production": {
@@ -51,11 +36,6 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://your-production-domain.com/rest-api/applicationservice",
         "EXPO_PUBLIC_API_TIMEOUT": "15000",
         "EXPO_PUBLIC_ENV": "production"
-      },
-      "extra": {
-        "apiBaseUrl": "https://your-production-domain.com/rest-api/applicationservice",
-        "apiTimeout": 15000,
-        "environment": "production"
       }
     }
   },
