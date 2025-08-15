@@ -334,7 +334,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <LogIn size={20} color="#ffffff" />
-                  ENV: {apiConfig.environment} | API: {apiConfig.baseURL}
+                  <Text style={styles.loginButtonText}>Sign In</Text>
                 </>
               )}
             </TouchableOpacity>

@@ -10,13 +10,18 @@ interface EnvironmentConfig {
 const fallbackConfig: EnvironmentConfig = {
   apiBaseUrl: 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice',
   apiTimeout: 12000,
-  environment: 'development',
+  environment: 'preview',
 };
 
 // Get environment configuration
 function getEnvironmentConfig(): EnvironmentConfig {
+  console.log('Getting environment config...');
+  console.log('process.env.EXPO_PUBLIC_API_BASE_URL:', process.env.EXPO_PUBLIC_API_BASE_URL);
+  console.log('Constants.expoConfig?.extra:', Constants.expoConfig?.extra);
+  
   // Try to get from process.env first (works in Expo Go and some builds)
   if (process.env.EXPO_PUBLIC_API_BASE_URL) {
+    console.log('Using process.env configuration');
     return {
       apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
       apiTimeout: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '12000'),
@@ -26,6 +31,7 @@ function getEnvironmentConfig(): EnvironmentConfig {
 
   // Try to get from Constants.expoConfig.extra (works in builds)
   if (Constants.expoConfig?.extra?.apiBaseUrl) {
+    console.log('Using Constants.expoConfig.extra configuration');
     return {
       apiBaseUrl: Constants.expoConfig.extra.apiBaseUrl,
       apiTimeout: Constants.expoConfig.extra.apiTimeout || 12000,
@@ -35,6 +41,7 @@ function getEnvironmentConfig(): EnvironmentConfig {
 
   // Try to get from Constants.manifest2 (newer Expo versions)
   if (Constants.manifest2?.extra?.expoClient?.extra?.apiBaseUrl) {
+    console.log('Using Constants.manifest2 configuration');
     const extra = Constants.manifest2.extra.expoClient.extra;
     return {
       apiBaseUrl: extra.apiBaseUrl,
@@ -44,7 +51,7 @@ function getEnvironmentConfig(): EnvironmentConfig {
   }
 
   // Use fallback configuration
-  console.warn('Environment variables not found, using fallback configuration');
+  console.warn('Environment variables not found, using fallback configuration for preview');
   return fallbackConfig;
 }
 

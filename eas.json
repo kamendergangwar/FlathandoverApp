@@ -25,7 +25,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice/",
+        "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
         "EXPO_PUBLIC_API_TIMEOUT": "12000",
         "EXPO_PUBLIC_ENV": "preview"
       }
