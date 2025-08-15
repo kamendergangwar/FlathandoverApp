@@ -1,17 +1,18 @@
 import axios from 'axios';
 import { environmentConfig } from '@/config/environment';
 
-// Use environment configuration
-const API_BASE_URL = environmentConfig.apiBaseUrl;
-const API_TIMEOUT = environmentConfig.apiTimeout;
-const ENV = environmentConfig.environment;
+// Force API configuration for builds
+const API_BASE_URL = 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice';
+const API_TIMEOUT = 12000;
+const ENV = 'preview';
 
-console.log('API Configuration:', {
-  baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
-  environment: ENV,
-  timestamp: new Date().toISOString()
-});
+console.log('=== API Service Configuration ===');
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('API_TIMEOUT:', API_TIMEOUT);
+console.log('ENV:', ENV);
+console.log('environmentConfig:', environmentConfig);
+console.log('Timestamp:', new Date().toISOString());
+console.log('=== End API Configuration ===');
 
 // Create axios instance with base configuration
 const api = axios.create({

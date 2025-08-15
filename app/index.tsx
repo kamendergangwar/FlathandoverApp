@@ -344,11 +344,9 @@ export default function LoginScreen() {
           
           <View style={styles.footer}>
             <Text style={styles.footerText}>Powered by CIDCO Homes</Text>
-            {__DEV__ && (
-              <Text style={styles.debugText}>
-                API: {apiConfig.environment} ({apiConfig.baseURL})
-              </Text>
-            )}
+            <Text style={styles.debugText}>
+              API: {apiConfig.environment} | {apiConfig.baseURL}
+            </Text>
           </View>
         </View>
       </SafeAreaView>
