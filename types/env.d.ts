@@ -1,12 +1,4 @@
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      EXPO_PUBLIC_API_BASE_URL: string;
-      EXPO_PUBLIC_API_TIMEOUT: string;
-      EXPO_PUBLIC_ENV: string;
-    }
-  }
-}
+// This file is no longer needed since we're not using environment variables
+// Keeping it empty for now in case other parts of the app reference it
 
-// Ensure this file is treated as a module
 export {};

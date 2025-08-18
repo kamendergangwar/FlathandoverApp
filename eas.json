@@ -7,36 +7,20 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice/",
-        "EXPO_PUBLIC_API_TIMEOUT": "12000",
-        "EXPO_PUBLIC_ENV": "development"
-      }
+      "env": {}
     },
     "staging": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
-        "EXPO_PUBLIC_API_TIMEOUT": "12000",
-        "EXPO_PUBLIC_ENV": "staging"
-      }
+      "env": {}
     },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://restlotterydev.cidcohomes.com/rest-api/applicationservice",
-        "EXPO_PUBLIC_API_TIMEOUT": "12000",
-        "EXPO_PUBLIC_ENV": "preview"
-      }
+      "env": {}
     },
     "production": {
       "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://your-production-domain.com/rest-api/applicationservice",
-        "EXPO_PUBLIC_API_TIMEOUT": "15000",
-        "EXPO_PUBLIC_ENV": "production"
-      }
+      "env": {}
     }
   },
   "submit": {

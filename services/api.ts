@@ -1,23 +1,19 @@
 import axios from 'axios';
-import { environmentConfig } from '@/config/environment';
-
-// Force API configuration for builds
-const API_BASE_URL = 'http://restlotterydev.cidcohomes.com/rest-api/applicationservice';
-const API_TIMEOUT = 12000;
-const ENV = 'preview';
+import { currentApiConfig, debugInfo } from '@/config/api-config';
 
 console.log('=== API Service Configuration ===');
-console.log('API_BASE_URL:', API_BASE_URL);
-console.log('API_TIMEOUT:', API_TIMEOUT);
-console.log('ENV:', ENV);
-console.log('environmentConfig:', environmentConfig);
+console.log('Current Environment:', debugInfo.currentEnvironment);
+console.log('Is Development:', debugInfo.isDev);
+console.log('API Base URL:', currentApiConfig.baseURL);
+console.log('API Timeout:', currentApiConfig.timeout);
+console.log('Environment:', currentApiConfig.environment);
 console.log('Timestamp:', new Date().toISOString());
 console.log('=== End API Configuration ===');
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
+  baseURL: currentApiConfig.baseURL,
+  timeout: currentApiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -73,7 +69,6 @@ export const authAPI = {
     api.post('Snagging/login', { username, password }),
 };
 
-
 export const snaggingAPI = {
   // Add other snagging-related API calls here
   getApplications: () => api.get('/applications'),
@@ -89,8 +84,4 @@ export const snaggingAPI = {
 };
 
 // Export configuration for debugging
-export const apiConfig = {
-  baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
-  environment: ENV,
-};
+export const apiConfig = currentApiConfig;
